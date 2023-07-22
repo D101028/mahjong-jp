@@ -52,6 +52,21 @@ def card_plus(userinput:str, z_contained = False, mod = False):
         output = str((int(userinput[0])+1)) + userinput[1:]
     return output
 
+def card_minus(userinput:str, z_contained = False, mod = False):
+    contained = "mpsz" if z_contained else "mps"
+    if not userinput[1] in contained:
+        return
+    if userinput[0] == "0":
+        userinput = "5" + userinput[1:]
+    if mod:
+        if userinput[1] == "z":
+            output = str(((int(userinput[0])-1)+1) % 7 - 1) + userinput[1:]
+        else:
+            output = str(((int(userinput[0])-1)+1) % 9 - 1) + userinput[1:]
+    else:
+        output = str((int(userinput[0])-1)) + userinput[1:]
+    return output
+
 def p_next(p:str):
     return MENFON_INDEX[(MENFON_INDEX.index(p) + 1) % 4]
 
@@ -187,16 +202,47 @@ class Game():
         return cutting
 
 
-    def chi(self):
+    def chi(self, chi_player:Player, chi_ed_player:Player):
         # 吃牌處理
-        for m, p in self.players.items():
+        for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
                 p.is_ippatsu_junme = False
         self.junme += 1
-        return 
+        self.playing = chi_player.menfon
+
+        chi_pai = chi_ed_player.river[-1]
+        del chi_ed_player.river[-1]
+        could_furo = []
+        minus1 = card_minus(chi_pai)
+        minus2 = card_minus(minus1)
+        plus1 = card_plus(chi_pai)
+        plus2 = card_plus(plus1)
+        if plus1 in chi_player.tehai and plus2 in chi_player.tehai:
+            could_furo.append([chi_pai, plus1, plus2])
+        if minus1 in chi_player.tehai and plus1 in chi_player.tehai:
+            could_furo.append([minus1, chi_pai, plus1])
+        if minus2 in chi_player.tehai and minus1 in chi_player.tehai:
+            could_furo.append([minus2, minus1, chi_pai])
+        chi_num = 0
+        if chi_player.menfon == "N": # 測試用
+            if len(could_furo) > 1:
+                count = 0
+                for i in could_furo:
+                    count += 1
+                    print(count, ":", i)
+                userinput = int(input(">>>"))
+                chi_num = userinput - 1
+        furo = []
+        furo.append(chi_pai+"*")
+        for i in could_furo[chi_num]:
+            if i != chi_pai:
+                furo.append(i)
+                del chi_player.tehai[chi_player.tehai.index(i)]
+        chi_player.furo.append(furo)
+
     def pon(self, pon_player:Player, pon_ed_player:Player):
         # 碰牌處理
-        for m, p in self.players.items():
+        for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
                 p.is_ippatsu_junme = False
         self.junme += 1
@@ -218,7 +264,7 @@ class Game():
     def kan(self):
         # 槓牌處理
         # 明槓
-        for m, p in self.players.items():
+        for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
                 p.is_ippatsu_junme = False
         self.junme += 1
@@ -640,12 +686,14 @@ class Game():
                 if h[0] == "0":
                     if not "5"+h[1] in agari_pai:
                         agari_pai.append("5"+h[1])
+                else:
+                    agari_pai.append(h)
         if is_tenpai and overright:
             player.is_tenpai = True 
             player.tenpais = agari_pai.copy()
             return player.is_tenpai, player.tenpais
         else:
-            return True, agari_pai.copy()
+            return is_tenpai, agari_pai.copy()
     
     def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] or None]:
         if len(player.furo) != 0:
@@ -680,7 +728,7 @@ class GameProcess():
                     self.game.draw()
                 player = self.game.players["N"]
                 if self.game.junme == 1: # 作弊一下
-                    player.tehai = ["1m","4m","1m","2m","3m","1m","5z","6m","7m","9m","9m","9m","9m","8m"]
+                    player.tehai = ["1m","1m","1m","2m","3m","4m","5m","6m","7m","9m","9m","9m","9m","1z"]
                 print(player.tehai, player.furo)
                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
@@ -707,9 +755,7 @@ class GameProcess():
                             print("Tenpai!", str(tenpais))
                     is_other_action = self.check(cutting)
                 else:
-
                     userinput = input(">>>").split(" ")
-                    
                     if "riichi" in userinput: # 立直
                         riichiable, agari_pai = self.game.check_riichi(player = player, cut_num = int(userinput[0])-1)
                         if riichiable:
@@ -753,6 +799,7 @@ class GameProcess():
     
     def check(self, c:str) -> bool:
         is_action = False
+        playing_player = self.game.players[self.game.playing]
         # 榮和
         players = self.ron_able(c)
         if len(players) != 0:
@@ -776,7 +823,7 @@ class GameProcess():
                     print("you can pon")
                     userinput = input(">>>")
                     if userinput == "pon":
-                        self.game.pon(pon_player = player, pon_ed_player = self.game.players[self.game.playing])
+                        self.game.pon(pon_player = player, pon_ed_player = playing_player)
                         print("pon nia!")
                         is_action = True
         else:
@@ -792,7 +839,15 @@ class GameProcess():
         # 吃
         players = self.chi_able(c)
         if len(players) != 0:
-            pass
+            next_player = self.game.players[p_next(self.game.playing)]
+            if next_player in players:
+                if next_player.menfon == "N": # 測試用
+                    print("you can chi")
+                    userinput = input(">>>")
+                    if userinput == "chi":
+                        self.game.chi(chi_player = next_player, chi_ed_player = playing_player)
+                        print("chi nia!")
+                        is_action = True
         else:
             pass
 
