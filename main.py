@@ -55,7 +55,7 @@ def card_plus(userinput:str, z_contained = False, mod = False):
 def p_next(p:str):
     return MENFON_INDEX[(MENFON_INDEX.index(p) + 1) % 4]
 
-def akadora_tran(tehai:list)->tuple[list,int]:
+def akadorasuu_tran(tehai:list)->tuple[list,int]:
     tehai = tehai.copy()
     count = 0
     dora = 0
@@ -241,7 +241,7 @@ class Game():
         if not len(tehai) in (2,5,8,11,14):
             return False
         # 紅寶處理
-        tehai = akadora_tran(tehai=tehai)[0]
+        tehai = akadorasuu_tran(tehai=tehai)[0]
 
         tehai = self.sort(tehai)
 
@@ -294,7 +294,7 @@ class Game():
         else:
             return False
 
-    def hansuu(self, player:Player = None, type:str = "tsumo", ron_hai:str = None, output_yaku = False) -> int or tuple[int,list[list]]:
+    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, output_yaku = False) -> int or tuple[int,list[list]]:
         # 飜數計算
         yaku = []
         tehai = player.tehai.copy()
@@ -313,13 +313,13 @@ class Game():
             return 0
 
         # 紅寶處理
-        tehai, akadora = akadora_tran(tehai=tehai)
+        tehai, akadorasuu = akadorasuu_tran(tehai=tehai)
         # 手牌格式轉換 (輸入副露)
         normal_tehai = tehai
         input_tehai = "".join(tehai)
         for i in player.furo:
-            i, a = akadora_tran(i)
-            akadora += a
+            i, a = akadorasuu_tran(i)
+            akadorasuu += a
             for h in i:
                 input_tehai += h[0] + h[1]
                 normal_tehai.append(h[0] + h[1])
@@ -344,21 +344,87 @@ class Game():
             yaku.append([1,s.ippatsu])
         
         # 門前清自摸和
-        if type == "tsumo" and len(player.furo) == 0:
+        if agari_type == "tsumo" and len(player.furo) == 0:
             han += 1
             yaku.append([1,s.tsumo])
 
-        hansuu_yaku_list = support.main(tehai=input_tehai, has_koyaku=False)[2]
+        # 加槓
+        # 海底撈月
+        # 河底摸魚
+        # 嶺上開花
+
+        # support.py 計算之役
+        result = support.main(tehai=input_tehai, has_koyaku=False)
+        hansuu_yaku_list = result[2]
+        pai_combin_list = result[3]
+        pos = -1
+        del_pos_list = []
         for h in hansuu_yaku_list:
-            # 平和特判
-            if [1, s.pinfu] in h or [1, s.pinfu+s.question_mark] in h:
-                if len(player.furo) != 0 or True: #非平和型
-                    
-                    if [1, s.pinfu] in h:
-                        h.remove([1, s.pinfu])
-                    else:
-                        h.remove([1, s.pinfu+s.question_mark])
-            
+            pos += 1
+            pai_combin = pai_combin_list[pos]
+            pai_combin.replace(s.yakuhai_ton*3, "111z")
+            pai_combin.replace(s.yakuhai_nan*3, "222z")
+            pai_combin.replace(s.yakuhai_shaa*3, "333z")
+            pai_combin.replace(s.yakuhai_pei*3, "444z")
+            pai_combin.replace(s.yakuhai_haku*3, "555z")
+            pai_combin.replace(s.yakuhai_hatsu*3, "666z")
+            pai_combin.replace(s.yakuhai_chun*3, "777z")
+            pai_combin.replace(s.yakuhai_ton*2, "11z")
+            pai_combin.replace(s.yakuhai_nan*2, "22z")
+            pai_combin.replace(s.yakuhai_shaa*2, "33z")
+            pai_combin.replace(s.yakuhai_pei*2, "44z")
+            pai_combin.replace(s.yakuhai_haku*2, "55z")
+            pai_combin.replace(s.yakuhai_hatsu*2, "66z")
+            pai_combin.replace(s.yakuhai_chun*2, "77z")
+
+            splitted_pai_combin = pai_combin.split(" ")
+            toitsu = splitted_pai_combin[0]
+            mentsu_s = splitted_pai_combin[1:]
+
+            # 國士無雙特判
+            if [26, s.kokushimusoujuusanmen] in h or [13, s.kokushimusou] in h:
+                if not normal_tehai[-1] in normal_tehai[:-1]:
+                    # 一般國士
+                    if not [13, s.kokushimusou] in h:
+                        h.remove([26, s.kokushimusoujuusanmen])
+                        h.append([13, s.kokushimusou])
+                else: # 十三面
+                    if [13, s.kokushimusou] in h:
+                        h.remove([13, s.kokushimusou])
+                        h.append([26, s.kokushimusoujuusanmen])
+
+            # 和牌分割不合副露
+            def is_mentsu_equal(mentsu1:str, mentsu2:list):
+                """123m == [1m*,2m,3m]\n 111z != [1m,1m,1m]"""
+                # print(mentsu1,mentsu2)
+                if mentsu1[3] == mentsu2[0][1]:
+                    num1 = mentsu1[:3]
+                    num2 = ""
+                    for i in mentsu2:
+                        num2 += i[0]
+                    num2_list = list(num2)
+                    num2_list.sort()
+                    num2 = "".join(num2_list)
+                    if num1 != num2:
+                        return False
+                    return True
+                return False
+            is_correct_furo = True
+            if len(splitted_pai_combin) == 5:
+                for furo in player.furo.copy():
+                    contained = False
+                    for i in mentsu_s:
+                        if is_mentsu_equal(i, furo):
+                            contained = True
+                    if not contained:
+                        is_correct_furo = False
+                        break
+            elif len(player.furo) != 0: # 七對子、國士無雙有副露
+                is_correct_furo = False
+            if not is_correct_furo:
+                del_pos_list.append(pos)
+                continue
+
             # 場風、自風特判
             if [1,s.yakuhai_ton+s.question_mark] in h:
                 if self.chanfon != "E":
@@ -394,6 +460,7 @@ class Game():
                     h.append([1,s.yakuhai_pei])
             
 
+
             # 門清特判:
             #     一盃口
             #     二盃口
@@ -411,48 +478,66 @@ class Game():
                     h.remove([26,s.junseichuurenpouton])
                 if [13,s.chuurenpouton] in h: # 九蓮
                     h.remove([13,s.chuurenpouton])
+            # 九蓮特判
+            if [13,s.chuurenpouton] in h:
+                t = normal_tehai[:-1]
+                t.sort()
+                nums = ""
+                for i in t:
+                    nums += i[0]
+                if nums == "1112345678999": # 九面聽
+                    h.remove([13,s.chuurenpouton])
+                    h.append([26,s.junseichuurenpouton])
+            elif [26,s.junseichuurenpouton] in h:
+                t = normal_tehai[:-1]
+                t.sort()
+                nums = ""
+                for i in t:
+                    nums += i[0]
+                if nums != "1112345678999": # 非九面聽
+                    h.remove([26,s.junseichuurenpouton])
+                    h.append([13,s.chuurenpouton])
+
 
             # 降翻特判:
             #     三色同順
-            if [3,s.sanshokudoujun] in h and len(player.furo) != 0:
-                h.remove([2,s.sanshokudoujun])
-                h.append([1,s.sanshokudoujun])
             #     一氣通貫
-            if [2,s.ikkitsuukan] in h and len(player.furo) != 0:
-                h.remove([2,s.ikkitsuukan])
-                h.append([1,s.ikkitsuukan])
             #     混全
-            if [2,s.honchantaiyaochuu] in h and len(player.furo) != 0:
-                h.remove([2,s.honchantaiyaochuu])
-                h.append([1,s.honchantaiyaochuu])
             #     混一色
-            if [3,s.honiisoo] in h and len(player.furo) != 0:
-                h.remove([3,s.honiisoo])
-                h.append([2,s.honiisoo])
             #     純全
-            if [3,s.junchantaiyaochuu] in h and len(player.furo) != 0:
-                h.remove([3,s.junchantaiyaochuu])
-                h.append([2,s.junchantaiyaochuu])
             #     清一色
-            if [6,s.chiniisoo] in h and len(player.furo) != 0:
-                h.remove([6,s.chiniisoo])
-                h.append([5,s.chiniisoo])
-
             #     一色三節
-            if [3,s.isshokusanjun] in h and len(player.furo) != 0:
-                h.remove([3,s.isshokusanjun])
-                h.append([2,s.isshokusanjun])
+            if len(player.furo) != 0:
+                for i in ([3,s.sanshokudoujun], [2,s.ikkitsuukan], [2,s.honchantaiyaochuu], [3,s.honiisoo], [3,s.junchantaiyaochuu], [3,s.junchantaiyaochuu], [6,s.chiniisoo], [3,s.isshokusanjun]):
+                    if i in h:
+                        h[h.index(i)][0] -= 1
 
             # 另計:
+            #     平和
+            if len(player.furo) == 0 and len(mentsu_s) == 4:
+                junsuu = 0
+                rianmen = False
+                for mentsu in mentsu_s:
+                    if mentsu[0] in (s.yakuhai_ton,s.yakuhai_nan,s.yakuhai_shaa,s.yakuhai_pei):
+                        continue
+                    if mentsu[0] == mentsu[1]:
+                        continue
+                    else:
+                        junsuu += 1
+                        if agari_hai in (mentsu[0]+mentsu[3], mentsu[2]+mentsu[3]):
+                            rianmen = True
+                if junsuu == 4 and rianmen:
+                    h.append([1, s.pinfu])
+
             #     寶牌
             dora_list = [card_plus(i, True, True) for i in self.rinshan]
-            if akadora != 0:
-                h.append([akadora, s.akadora])
-            dora = 0
+            if akadorasuu != 0:
+                h.append([akadorasuu, s.akadorasuu])
+            dorasuu = 0
             for d in dora_list:
-                dora += normal_tehai.count(d)
-            if dora != 0:
-                h.append([dora, s.dora])
+                dorasuu += normal_tehai.count(d)
+            if dorasuu != 0:
+                h.append([dorasuu, s.dora])
             #     四槓子
             kan = 0
             for i in player.furo:
@@ -494,15 +579,22 @@ class Game():
                         if normal_tehai.count(agari_hai) != 2:
                             h.remove([26, s.suuankootanki])
                             h.append([13, s.suuankoo])
-
             #     天地和/人和
             if self.junme == 1:
                 if player.menfon == "E":
                     h.append([13, s.tenhou])
                 else:
                     h.append([13, s.chiihou])
+                    
             #     累計役滿
+        
+        # 刪除不合之組合
+        del_pos_list.sort()
+        del_pos_list.reverse()
+        for p in del_pos_list:
+            del hansuu_yaku_list[p]
 
+        # 合併、取最大飜數
         maximum = 0
         max_set = hansuu_yaku_list[0]
         for h in hansuu_yaku_list:
@@ -547,7 +639,9 @@ class Game():
         for h in INDEX[0]:
             if self.is_agari(tehai=tehai+[h]):
                 is_tenpai = True
-                agari_pai.append(h)
+                if h[0] == "0":
+                    if not "5"+h[1] in agari_pai:
+                        agari_pai.append("5"+h[1])
         if is_tenpai:
             player.is_tenpai = True 
             player.tenpais = agari_pai.copy()
@@ -585,8 +679,8 @@ class GameProcess():
                 else:
                     self.game.draw()
                 player = self.game.players["N"]
-                # if self.game.junme == 1: # 作弊一下
-                #     player.tehai = ["1s","1s","2s","2s","3s","3s","4s","4s","5s","5s","6s","6s","1z","2z"]
+                if self.game.junme == 1: # 作弊一下
+                    player.tehai = ["1m","4m","1m","2m","3m","1m","5z","6m","7m","9m","9m","9m","9m","8m"]
                 print(player.tehai, player.furo)
                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
@@ -595,7 +689,7 @@ class GameProcess():
                     print("you can tsumo!", end="")
                     if "tsumo" in input(">>>"):
                         print("You Win!!")
-                        print(self.game.hansuu(player=player, type="tsumo", output_yaku=True))
+                        print(self.game.hansuu(player=player, agari_type="tsumo", output_yaku=True))
                         exit()
 
                 if player.is_riichi: # 立直摸切
@@ -653,7 +747,7 @@ class GameProcess():
         for m in MENFON_INDEX:
             print(m, end=": ")
             if self.game.players[m].is_tenpai:
-                print("Tenpai")
+                print("Tenpai:", player.tenpais)
             else:
                 print("No ten")
     
@@ -712,7 +806,7 @@ class GameProcess():
             player = self.game.players[p]
             if player.furiten: # 振聽
                 continue
-            if self.game.hansuu(player = player, type = "ron", ron_hai = c) != 0:
+            if self.game.hansuu(player = player, agari_type = "ron", ron_hai = c) != 0:
                 players.append(player)
         return players
     
@@ -774,11 +868,15 @@ if __name__=="__main__":
     # print(Game.is_agari(self = None, tehai = tehai))
     # g = Game()
     # p = g.players["N"]
-    # p.tehai = ['6m', '7m', '4p', '5p', '6p', '2z', '2z', '6z', '6z', '6z', '5m']
-    # p.tehai = ['5m', '6m', '7m', '4p', '5p', '6p', '2z', '2z', '6z', '6z', '6z']
+    # p.tehai = ["1m","2m","3m","2m","3m","4m","7m","8m","9m","5m"]
+    # p.furo = [["7m*","8m","9m"]]
+    # p.tehai = ["1m","2m","3m","4m","4m","5m","6m","6m","9m","9m"]
+    # p.furo = [["1m*","2m","3m"]]
+    # p.tehai = ["1m","1m","1p","9p","1s","9s","1z","2z","3z","4z","5z","6z","7z"]
+    # p.tehai = ["1m","1m","1m","2m","3m","4m","5m","6m","7m","9m","9m","9m","9m"]
     # p.furo = [['3m', '3m', '3m*']]
     # p.is_riichi = False 
-    # print(g.hansuu(p, "tsumo", "1s"))
+    # print(g.hansuu(p, "ron", "8m", output_yaku=True))
     # tehai = ['6m', '7m', '4p', '5p', '6p', '2z', '2z', '6z', '6z', '6z']
     # print(g.check_tenpai(p))
     # print(g.is_agari(p.tehai))

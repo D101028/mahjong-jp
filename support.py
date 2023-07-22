@@ -97,19 +97,19 @@ def yaku_and_output(tehai9:list,hoorakei:list,did_tsumo:bool,is_karaten:bool,tsu
 
         #pinfu
         #not checking chanfon or menfon
-        if len(hoorakei)==5 and all(i[0]=='s' for i in hoorakei[1:]) and hoorakei[0][1]<35:
-            if did_tsumo==False and tsumohai<30:
-                if any((tsumohai==i[1] and tsumohai not in (7,17,27)) or (tsumohai==i[3] and tsumohai not in (3,13,23)) for i in hoorakei[1:]):
-                    if hoorakei[0][1]>30:
-                        yaku.append(s.pinfu+s.question_mark)
-                    else:
-                        yaku.append(s.pinfu)
-                    hansuu+=1
-                    hansuu_yaku.append([1,s.pinfu])
-            else:
-                yaku.append(s.pinfu+s.question_mark)
-                hansuu+=1
-                hansuu_yaku.append([1,s.pinfu])
+        # if len(hoorakei)==5 and all(i[0]=='s' for i in hoorakei[1:]) and hoorakei[0][1]<35:
+        #     if did_tsumo==False and tsumohai<30:
+        #         if any((tsumohai==i[1] and tsumohai not in (7,17,27)) or (tsumohai==i[3] and tsumohai not in (3,13,23)) for i in hoorakei[1:]):
+        #             if hoorakei[0][1]>30:
+        #                 yaku.append(s.pinfu+s.question_mark)
+        #             else:
+        #                 yaku.append(s.pinfu)
+        #             hansuu+=1
+        #             hansuu_yaku.append([1,s.pinfu])
+        #     else:
+        #         yaku.append(s.pinfu+s.question_mark)
+        #         hansuu+=1
+        #         hansuu_yaku.append([1,s.pinfu])
 
         #iipeekoo
         #not checking menzenchin
@@ -409,25 +409,30 @@ def yaku_and_output(tehai9:list,hoorakei:list,did_tsumo:bool,is_karaten:bool,tsu
 
     #output
     string=""
+    pai_combin = ""
     if dahai:
         string+=s.da+" ["+output_hai(dahai,is_number_only)+"] "
-    # if did_tsumo:
-    #     string+=s.hoora+" | "
-    # elif did_tsumo==False:
-    #     string+=(s.karaten if is_karaten else s.tenpai)+" ["+output_hai(tsumohai,is_number_only)+"] | "
-    # for j in hoorakei:
-    #     string+=output_hais(j[1:],is_number_only,True," ")
-    # string+="|"
+    if did_tsumo:
+        string+=s.hoora+" | "
+    elif did_tsumo==False:
+        pass 
+        # string+=(s.karaten if is_karaten else s.tenpai)+" ["+output_hai(tsumohai,is_number_only)+"] | "
+    for j in hoorakei:
+        combin = output_hais(j[1:],is_number_only,True," ")
+        string+=combin
+        pai_combin+=combin
+    string+="|"
     if is_yakuman and hansuu>=13:
         string+=" "+s.yakuman_level_list[hansuu//13]+s.colon
     elif not is_yakuman and hansuu>=13:
         string+=" "+s.kazoeyakuman+"("+str(hansuu)+s.han+")"+s.colon
     elif hansuu>0:
         string+=str(hansuu).rjust(3)+s.han+s.colon
-    # string+=s.ideographic_comma.join(yaku)+"\n"
-    # print(yaku)
+    string+=s.ideographic_comma.join(yaku)+"\n"
+    while pai_combin[-1] == " ":
+        pai_combin = pai_combin[:-1]
 
-    return hansuu,string,hansuu_yaku
+    return hansuu,string,hansuu_yaku,pai_combin
 
 def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=False,has_koyaku:bool=False)->tuple[str,list,list[list]]:
     string=""
@@ -609,14 +614,16 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
         hoorakeis=[]
         hansuu=[]
         hansuu_yaku_list = []
+        pai_combin_list = []
 
         #kokushimusou
         if haisuu==14 and not any(tehai9[2:9]) and not any(tehai9[12:19]) and not any(tehai9[22:29]) and tehai9[1] and tehai9[9] and tehai9[11] and tehai9[19] and tehai9[21] and tehai9[29] and all(tehai9[31:]):
             is_hoora=True
             hoorakeis.append([['j',tehai9.index(2),tehai9.index(2),None]]+[['tp',i,None,None] for i in range(38) if tehai9[i]==1])
-            hansuu_temp,string_temp,hansuu_yaku=yaku_and_output(tehai9,hoorakeis[-1],did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
+            hansuu_temp,string_temp,hansuu_yaku,pai_combin=yaku_and_output(tehai9,hoorakeis[-1],did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
             hansuu.append(hansuu_temp)
             hansuu_yaku_list.append(hansuu_yaku)
+            pai_combin_list.append(pai_combin)
             string+=string_temp
         else:
 
@@ -624,9 +631,10 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
             if haisuu==14 and tehai9.count(2)==7:
                 is_hoora=True
                 hoorakeis.append([['t',i,i,None] for i in range(10 if is_number_only else 38) if tehai9[i]==2])
-                hansuu_temp,string_temp,hansuu_yaku=yaku_and_output(tehai9,hoorakeis[-1],did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
+                hansuu_temp,string_temp,hansuu_yaku,pai_combin=yaku_and_output(tehai9,hoorakeis[-1],did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
                 hansuu.append(hansuu_temp)
                 hansuu_yaku_list.append(hansuu_yaku)
+                pai_combin_list.append(pai_combin)
                 string+=string_temp
 
             #analyse tehai
@@ -648,9 +656,10 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
                         hoorakei_temp.sort()
                         if hoorakei_temp not in hoorakeis:
                             hoorakeis.append(hoorakei_temp)
-                            hansuu_temp,string_temp,hansuu_yaku=yaku_and_output(tehai9,hoorakei_temp,did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
+                            hansuu_temp,string_temp,hansuu_yaku,pai_combin=yaku_and_output(tehai9,hoorakei_temp,did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
                             hansuu.append(hansuu_temp)
                             hansuu_yaku_list.append(hansuu_yaku)
+                            pai_combin_list.append(pai_combin)
                             string+=string_temp
                             #if sanrenkoo then change to 3-shuntsu
                             hoorakei_new_num=1
@@ -671,9 +680,10 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
                                                 if hoorakei_temp not in hoorakeis:
                                                     hoorakeis.append(hoorakei_temp)
                                                     hoorakei_new_num+=1
-                                                    hansuu_temp,string_temp,hansuu_yaku=yaku_and_output(tehai9,hoorakei_temp,did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
+                                                    hansuu_temp,string_temp,hansuu_yaku,pai_combin=yaku_and_output(tehai9,hoorakei_temp,did_tsumo,is_karaten,tsumohai,dahai,is_number_only,has_koyaku)
                                                     hansuu.append(hansuu_temp)
                                                     hansuu_yaku_list.append(hansuu_yaku)
+                                                    pai_combin_list.append(pai_combin)
                                                     string+=string_temp
                         continue
                     for hai_picked in range(10 if is_number_only else 38):
@@ -753,7 +763,7 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
     if did_tsumo==False and not dahai and not is_tenpai:
         string+=s.nooten
 
-    return string,string_chiniisoo_chart,hansuu_yaku_list
+    return string,string_chiniisoo_chart,hansuu_yaku_list,pai_combin_list
 
 
 # def yaku_combin(tehai_list:list=None, tehai:str=None, furo:list=None, chanfon="N", menfon="N"):
@@ -802,8 +812,10 @@ if __name__=="__main__":
     te1 = "11123456789m111z"
     te2 = "123345567m11456p"
     te3 = "111222333z123p22s"
-    te4 = "11222p"
-    output = main(tehai=te4)
-    print(output[0])
-    for i in output[2]:
+    te4 = "19s19m19p12345677z"
+    # output = main(tehai=te4)
+    # print(output[0])
+    # for i in output[2]:
+    #     print(i)
+    for i in main(tehai=te4):
         print(i)
