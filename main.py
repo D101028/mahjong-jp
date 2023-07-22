@@ -586,8 +586,6 @@ class Game():
                 else:
                     h.append([13, s.chiihou])
                     
-            #     累計役滿
-        
         # 刪除不合之組合
         del_pos_list.sort()
         del_pos_list.reverse()
@@ -630,7 +628,7 @@ class Game():
         # 點數計算
         return 
     
-    def check_tenpai(self, player:Player = None) -> tuple[bool, list[str]]:
+    def check_tenpai(self, player:Player = None, overright = True) -> tuple[bool, list[str]]:
         if player is None:
             player = self.players[self.playing]
         is_tenpai = False
@@ -642,10 +640,12 @@ class Game():
                 if h[0] == "0":
                     if not "5"+h[1] in agari_pai:
                         agari_pai.append("5"+h[1])
-        if is_tenpai:
+        if is_tenpai and overright:
             player.is_tenpai = True 
             player.tenpais = agari_pai.copy()
-        return player.is_tenpai, player.tenpais
+            return player.is_tenpai, player.tenpais
+        else:
+            return True, agari_pai.copy()
     
     def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] or None]:
         if len(player.furo) != 0:
@@ -858,9 +858,9 @@ class GameProcess():
             if boolean1 or boolean2 or boolean3:
                 players.append(player)
         return players
-  
-    
-    
+
+
+
 
 if __name__=="__main__":
     GameProcess()
