@@ -686,15 +686,6 @@ class Game():
                 if junsuu == 4 and rianmen:
                     h.append([1, s.pinfu])
 
-            #     寶牌
-            dora_list = [card_plus(i, True, True) for i in self.rinshan]
-            if akadorasuu != 0:
-                h.append([akadorasuu, s.akadorasuu])
-            dorasuu = 0
-            for d in dora_list:
-                dorasuu += normal_tehai.count(d)
-            if dorasuu != 0:
-                h.append([dorasuu, s.dora])
             #     四槓子
             kan = 0
             for i in player.furo:
@@ -748,6 +739,18 @@ class Game():
                 else:
                     h.append([13, s.chiihou])
                     
+            #     寶牌 # 不是役
+            if len(yaku) + len(h) != 0:
+                dora_list = [card_plus(i, True, True) for i in self.rinshan]
+                if akadorasuu != 0:
+                    h.append([akadorasuu, s.akadorasuu])
+                dorasuu = 0
+                for d in dora_list:
+                    dorasuu += normal_tehai.count(d)
+                if dorasuu != 0:
+                    h.append([dorasuu, s.dora])
+
+
         # 刪除不合之組合
         del_pos_list.sort()
         del_pos_list.reverse()
@@ -1121,9 +1124,7 @@ class GameProcess():
                         self.game.pon(pon_player = player, pon_ed_player = playing_player)
                         print("pon nia!")
                         is_chi_pon = True
-        else:
-            pass
-
+        
         # 明槓
         players = self.kan_able(c)
         if len(players) != 0:
@@ -1138,9 +1139,7 @@ class GameProcess():
                         print("kan nia!")
                         self.chyankan_check(c)
                         is_minkan = True
-        else:
-            pass
-
+        
         # 吃
         players = self.chi_able(c)
         if len(players) != 0:
@@ -1153,9 +1152,7 @@ class GameProcess():
                         self.game.chi(chi_player = next_player, chi_ed_player = playing_player)
                         print("chi nia!")
                         is_chi_pon = True
-        else:
-            pass
-
+        
         return is_chi_pon, is_minkan
     
     def ron_able(self, c:str) -> list[Player]:
@@ -1228,8 +1225,9 @@ if __name__=="__main__":
     # tehai = ["1z", "1z", "1z", "4z", "4z", "5m", "6m", "7m", "1s", "1s", "1s", "2s", "3s", "1s"]
     # print(Game.is_agari(self = None, tehai = tehai))
     # g = Game()
+    # print(g.rinshan)
     # p = g.players["N"]
-    # p.tehai = ["1m","1m","1m","2m","2m","4m","4m","4m","7m","7m","9m","9m","9m","9m"]
+    # p.tehai = ["1m","2m","3m","2m","3m","4m","7m","7m","7m","1s","2s","3s","5s"]
 
     # p.furo = [["7m*","8m","9m"]]
     # p.tehai = ["1m","2m","3m","4m","4m","5m","6m","6m","9m","9m"]
@@ -1238,7 +1236,7 @@ if __name__=="__main__":
     # p.tehai = ["1m","1m","1m","2m","3m","4m","5m","6m","7m","9m","9m","9m","9m"]
     # p.furo = [['3m', '3m', '3m*']]
     # p.is_riichi = False 
-    # print(g.hansuu(p, "ron", "8m", output_yaku=True))
+    # print(g.hansuu(p, "ron", "5s", output_yaku=True))
     # tehai = ['6m', '7m', '4p', '5p', '6p', '2z', '2z', '6z', '6z', '6z']
     # print(g.check_tenpai(p))
     # print(g.is_agari(p.tehai))
