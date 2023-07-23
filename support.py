@@ -17,7 +17,7 @@ def output_hais(tehai1:list,is_number_only:bool=False,jihai_in_kanji:bool=True,e
         string_pinzu=''.join(str(i-10) for i in tehai1 if i and 10<i<20)+("p" if any(i in tehai1 for i in range(11,20)) else "")
         string_soozu=''.join(str(i-20) for i in tehai1 if i and 20<i<30)+("s" if any(i in tehai1 for i in range(21,30)) else "")
         if jihai_in_kanji:
-            string_jihai=' '.join(('東','南','西','北','白','發','中')[i-31]*(tehai1.count(i)) for i in range(30,38) if tehai1.count(i))
+            string_jihai=' '.join(('1z','2z','3z','4z','5z','6z','7z')[i-31]*(tehai1.count(i)) for i in range(30,38) if tehai1.count(i))
         else:
             string_jihai=''.join(str(i-30) for i in tehai1 if i and 30<i<38)+("z" if any(i in tehai1 for i in range(30,38)) else "")
         string=' '.join(i for i in (string_manzu,string_pinzu,string_soozu,string_jihai) if i)
@@ -724,17 +724,17 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
             else:
                 string+=s.not_hoora+"\n"
                 #dahai
-                if is_chiniisoo:
-                    string_chiniisoo_chart+="\n打\\和 1 |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |\n"
-                for sutehai_i in range(10 if is_number_only else 38):
-                    if sutehai_i in tehai1:
-                        tehai1_new=tehai1.copy()
-                        tehai1_new.remove(sutehai_i)
-                        if is_chiniisoo:
-                            string_chiniisoo_chart+=str(sutehai_i%10)+" |"
-                        a,b=main(tehai1=tehai1_new,dahai=sutehai_i,is_number_only=is_number_only,has_koyaku=has_koyaku)
-                        string+=a
-                        string_chiniisoo_chart+=b+"\n"
+                # if is_chiniisoo:
+                #     string_chiniisoo_chart+="\n打\\和 1 |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |\n"
+                # for sutehai_i in range(10 if is_number_only else 38):
+                #     if sutehai_i in tehai1:
+                #         tehai1_new=tehai1.copy()
+                #         tehai1_new.remove(sutehai_i)
+                #         if is_chiniisoo:
+                #             string_chiniisoo_chart+=str(sutehai_i%10)+" |"
+                #         a,b=main(tehai1=tehai1_new, dahai=sutehai_i, is_number_only=is_number_only, has_koyaku=has_koyaku)
+                #         string+=a
+                #         string_chiniisoo_chart+=b+"\n"
 
         if did_tsumo:
             break
@@ -809,7 +809,7 @@ def main(tehai:str=None,tehai1:list=None,dahai:int=None,is_number_only:bool=Fals
 
 
 if __name__=="__main__":
-    te1 = "11123456789m111z"
+    te1 = "11122233344455z"
     te2 = "123345567m11456p"
     te3 = "111222333z123p22s"
     te4 = "19s19m19p12345677z"
@@ -817,5 +817,5 @@ if __name__=="__main__":
     # print(output[0])
     # for i in output[2]:
     #     print(i)
-    for i in main(tehai=te4):
+    for i in main(tehai=te1):
         print(i)
