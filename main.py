@@ -435,7 +435,7 @@ class Game():
         else:
             return False
 
-    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, output_yaku = False, is_chyankan = False) -> int or tuple[int,list[list]]:
+    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, is_output_yaku = False, is_output_pai_combin = False, is_chyankan = False) -> int or tuple[int,list[list]] or tuple[int]:
         # 飜數計算
         yaku = []
         tehai = player.tehai.copy()
@@ -517,20 +517,6 @@ class Game():
         for h in hansuu_yaku_list:
             pos += 1
             pai_combin = pai_combin_list[pos]
-            pai_combin.replace(s.yakuhai_ton*3, "111z")
-            pai_combin.replace(s.yakuhai_nan*3, "222z")
-            pai_combin.replace(s.yakuhai_shaa*3, "333z")
-            pai_combin.replace(s.yakuhai_pei*3, "444z")
-            pai_combin.replace(s.yakuhai_haku*3, "555z")
-            pai_combin.replace(s.yakuhai_hatsu*3, "666z")
-            pai_combin.replace(s.yakuhai_chun*3, "777z")
-            pai_combin.replace(s.yakuhai_ton*2, "11z")
-            pai_combin.replace(s.yakuhai_nan*2, "22z")
-            pai_combin.replace(s.yakuhai_shaa*2, "33z")
-            pai_combin.replace(s.yakuhai_pei*2, "44z")
-            pai_combin.replace(s.yakuhai_haku*2, "55z")
-            pai_combin.replace(s.yakuhai_hatsu*2, "66z")
-            pai_combin.replace(s.yakuhai_chun*2, "77z")
 
             splitted_pai_combin = pai_combin.split(" ")
             toitsu = splitted_pai_combin[0]
@@ -756,8 +742,10 @@ class Game():
         del_pos_list.reverse()
         for p in del_pos_list:
             del hansuu_yaku_list[p]
+        for p in pai_combin_list:
+            del pai_combin_list[p]
 
-        # 役滿特判
+        # 合併、役滿特判
         final_yaku_list = []
         for i in hansuu_yaku_list:
             yaku_temp = yaku + i
@@ -771,9 +759,11 @@ class Game():
                 final_yaku_list.append(yaku_temp)
             else:
                 final_yaku_list.append(yakuman)
-        # 合併、取最大飜數
+        # 取最大飜數
         maximum = 0
         max_set = final_yaku_list[0]
+        pos = 0
+        max_pos = 0
         for h in final_yaku_list:
             count = 0
             for i in h:
@@ -781,11 +771,17 @@ class Game():
             if count > maximum:
                 maximum = count
                 max_set = h
+                max_pos = pos
+            pos += 1
         han = maximum
-        if output_yaku:
-            yaku = max_set
 
-            return han, yaku
+        output_yaku = max_set
+        output_pai_combin = pai_combin_list[pos]
+        if is_output_yaku:
+            if is_output_pai_combin:
+                return han, output_yaku, output_pai_combin
+            else:
+                return han, output_yaku
         else:
             return han
     
@@ -883,7 +879,7 @@ class GameProcess():
                     print("you can tsumo!", end="")
                     if "tsumo" in input(">>>"):
                         print("You Win!!")
-                        print(self.game.hansuu(player=player, agari_type="tsumo", output_yaku=True))
+                        print(self.game.hansuu(player=player, agari_type="tsumo", is_output_yaku=True))
                         exit()
 
                 furo_koutsu = [] # ex.["2m", "1z"]
@@ -1048,7 +1044,7 @@ class GameProcess():
                         userinput = input(">>>")
                         if userinput == "ron":
                             print("YOU WIN!")
-                            print(self.game.hansuu(player, "ron", kan_pai, output_yaku=True, is_chyankan=True))
+                            print(self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True))
                             exit()
                         else:
                             if player.is_riichi: # 立直振聽
@@ -1073,7 +1069,7 @@ class GameProcess():
                     userinput = input(">>>")
                     if userinput == "ron":
                         print("YOU WIN!")
-                        print(self.game.hansuu(player, "ron", kan_pai, output_yaku=True, is_chyankan=True))
+                        print(self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True))
                         exit()
                     else:
                         if player.is_riichi: # 立直振聽
@@ -1093,7 +1089,7 @@ class GameProcess():
                     userinput = input(">>>")
                     if userinput == "ron":
                         print("YOU WIN!")
-                        print(self.game.hansuu(player, "ron", c, output_yaku=True))
+                        print(self.game.hansuu(player, "ron", c, is_output_yaku=True))
                         exit()
                     else:
                         if player.is_riichi: # 立直振聽
@@ -1236,7 +1232,7 @@ if __name__=="__main__":
     # p.tehai = ["1m","1m","1m","2m","3m","4m","5m","6m","7m","9m","9m","9m","9m"]
     # p.furo = [['3m', '3m', '3m*']]
     # p.is_riichi = False 
-    # print(g.hansuu(p, "ron", "5s", output_yaku=True))
+    # print(g.hansuu(p, "ron", "5s", is_output_yaku=True))
     # tehai = ['6m', '7m', '4p', '5p', '6p', '2z', '2z', '6z', '6z', '6z']
     # print(g.check_tenpai(p))
     # print(g.is_agari(p.tehai))
