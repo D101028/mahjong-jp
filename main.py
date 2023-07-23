@@ -1173,7 +1173,7 @@ class GameProcess():
     def pon_able(self, c:str) -> list[Player]:
         players = []
         for p in MENFON_INDEX:
-            if p == self.game.playing:
+            if p == self.game.playing or player.is_riichi:
                 continue
             player = self.game.players[p]
             if player.tehai.count(c) >= 2:
@@ -1181,9 +1181,10 @@ class GameProcess():
         return players
     
     def kan_able(self, c:str) -> list[Player]:
+        # 明槓
         players = []
         for p in MENFON_INDEX:
-            if p == self.game.playing:
+            if p == self.game.playing or player.is_riichi:
                 continue
             player = self.game.players[p]
             if player.tehai.count(c) >= 3:
@@ -1195,7 +1196,7 @@ class GameProcess():
         if c[1] == "z":
             return []
         for p in MENFON_INDEX:
-            if p == self.game.playing:
+            if p == self.game.playing or player.is_riichi:
                 continue
             player = self.game.players[p]
             tehai = player.tehai.copy()
