@@ -105,8 +105,12 @@ class Player():
         self.is_riichi = False 
         self.riichi_junme = None
         self.is_ippatsu_junme = False
+        # 捨牌、立直振聽
         self.furiten_pai = []
         self.furiten = False
+        # 同巡振聽
+        self.doujun_furiten_pai = []
+        self.doujun_furiten = False
     
     def sort(self, userinput: list, index = ["m","p","s","z"]):
         # 理牌
@@ -124,6 +128,12 @@ class Player():
             i.sort()
         return clubs[0] + clubs[1] + clubs[2] + clubs[3]
 
+    def is_menchin(self):
+        for i in self.furo:
+            for j in i:
+                if len(i) != 2:
+                    return False 
+        return True
 
 class Game():
     def __init__(self):
@@ -155,7 +165,9 @@ class Game():
         self.junme = 0 # 巡數
         self.rinshan = [self.yama[0]]
         del self.yama[0]
-
+        
+        # 嶺上開花巡
+        self.rinshankaihou_able = False
         # self.draw()
 
     def deal(self, player = 4):
@@ -198,7 +210,15 @@ class Game():
         del player.tehai[num-1]
         player.tehai = self.sort(player.tehai)
         player.river.append(cutting)
-        player.furiten_pai.append(cutting)
+        if cutting[0] == "0":
+            player.furiten_pai.append("5"+cutting[1:])
+        else:
+            player.furiten_pai.append(cutting)
+
+        # 解除同巡振聽
+        player.doujun_furiten_pai = []
+        player.doujun_furiten = False
+
         return cutting
 
 
@@ -261,15 +281,40 @@ class Game():
         del pon_player.tehai[pon_player.tehai.index(pon_pai)]
         del pon_player.tehai[pon_player.tehai.index(pon_pai)]
 
-    def kan(self):
-        # 槓牌處理
-        # 明槓
+    def minkan(self, kan_player:Player, kan_ed_player:Player):
+        # 明槓處理
         for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
                 p.is_ippatsu_junme = False
         self.junme += 1
-        # 暗槓、加槓
-        return 
+        self.playing = kan_player.menfon
+
+        kan_pai = kan_ed_player.river[-1]
+        del kan_ed_player.river[-1]
+        furo = [kan_pai, kan_pai, kan_pai]
+        if kan_ed_player.menfon == p_next(kan_player.menfon):
+            furo[2]+="**"
+        elif kan_ed_player.menfon == p_next(p_next(kan_player.menfon)):
+            furo[1]+="**"
+        elif kan_ed_player.menfon == p_next(p_next(p_next(kan_player.menfon))):
+            furo[0]+="**"
+        kan_player.furo.append(furo)
+        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+
+        # 嶺上開花巡
+        self.rinshankaihou_able = True
+
+    def kakan(self):
+        # 加槓
+        pass
+
+    def ankan(self):
+        # 暗槓
+        # 翻嶺上牌
+        pass
+
     def ron(self):
         # 榮和處理
         return 
@@ -358,6 +403,8 @@ class Game():
         if not self.is_agari(tehai):
             return 0
 
+        # 是否門清
+        is_menchin = player.is_menchin()
         # 紅寶處理
         tehai, akadorasuu = akadorasuu_tran(tehai=tehai)
         # 手牌格式轉換 (輸入副露)
@@ -376,7 +423,7 @@ class Game():
             player = self.players["E"]
 
         # 立直 or 雙立直
-        if player.is_riichi and len(player.furo)==0:
+        if player.is_riichi and is_menchin:
             if player.riichi_junme == 1:
                 han += 2
                 yaku.append([2,s.dabururiichi])
@@ -385,19 +432,22 @@ class Game():
                 yaku.append([1,s.riichi])
 
         # 一發
-        if player.is_ippatsu_junme and len(player.furo)==0:
+        if player.is_ippatsu_junme and is_menchin:
             han += 1
             yaku.append([1,s.ippatsu])
         
         # 門前清自摸和
-        if agari_type == "tsumo" and len(player.furo) == 0:
+        if agari_type == "tsumo" and is_menchin:
             han += 1
             yaku.append([1,s.tsumo])
 
-        # 加槓
+        # 搶槓
         # 海底撈月
         # 河底摸魚
         # 嶺上開花
+        if agari_type == "tsumo" and self.rinshankaihou_able:
+            han += 1
+            yaku.append([1,s.rinshankaihou])
 
         # support.py 計算之役
         result = support.main(tehai=input_tehai, has_koyaku=False)
@@ -465,7 +515,7 @@ class Game():
                     if not contained:
                         is_correct_furo = False
                         break
-            elif len(player.furo) != 0: # 七對子、國士無雙有副露
+            elif not is_menchin: # 七對子、國士無雙有副露
                 is_correct_furo = False
             if not is_correct_furo:
                 del_pos_list.append(pos)
@@ -511,7 +561,7 @@ class Game():
             #     一盃口
             #     二盃口
             #     九蓮寶燈/純正
-            if len(player.furo) != 0:
+            if not is_menchin:
                 if [1,s.iipeekoo] in h:
                     h.remove([1,s.iipeekoo])
                 if [3,s.ryanpeekoo] in h:
@@ -553,14 +603,14 @@ class Game():
             #     純全
             #     清一色
             #     一色三節
-            if len(player.furo) != 0:
+            if not is_menchin:
                 for i in ([3,s.sanshokudoujun], [2,s.ikkitsuukan], [2,s.honchantaiyaochuu], [3,s.honiisoo], [3,s.junchantaiyaochuu], [3,s.junchantaiyaochuu], [6,s.chiniisoo], [3,s.isshokusanjun]):
                     if i in h:
                         h[h.index(i)][0] -= 1
 
             # 另計:
             #     平和
-            if len(player.furo) == 0 and len(mentsu_s) == 4:
+            if is_menchin and len(mentsu_s) == 4:
                 junsuu = 0
                 rianmen = False
                 for mentsu in mentsu_s:
@@ -596,9 +646,14 @@ class Game():
             if [13, s.suuankoo] in h or [26, s.suuankootanki] in h:
                 ankan = 0
                 for i in player.furo:
+                    not_ankan = False
                     for j in i:
-                        if "***" in j:
-                            ankan += 1
+                        if len(j) != 2:
+                            not_ankan = True
+                            break 
+                    if not not_ankan:
+                        ankan += 1
+
                 pon_furo = len(player.furo) - ankan
                 if pon_furo == 1:
                     if [13, s.suuankoo] in h:
@@ -696,7 +751,7 @@ class Game():
             return is_tenpai, agari_pai.copy()
     
     def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] or None]:
-        if len(player.furo) != 0:
+        if not player.is_menchin():
             return False, None
         if len(player.tehai) != 14:
             print(player.tehai)
@@ -717,18 +772,24 @@ class GameProcess():
         self.game = Game()
         print("rinshan:", self.game.rinshan)
 
-        is_chii_pon_kan = False
+        is_to_draw = True # 是否摸牌
         count = 0
         while len(self.game.yama) > 14:
             is_other_action = False # 是否有人鳴牌
+            is_chi_pon_inner = False 
+            is_minkan = False 
+            is_kakan = False 
+            is_ankan = False
             if self.game.playing == "N": # 自身扮演
-                if is_chii_pon_kan:
+                if not is_to_draw:
                     pass 
                 else:
                     self.game.draw()
                 player = self.game.players["N"]
+                if self.game.rinshankaihou_able: # 必定嶺上開花
+                    player.tehai[-1] = "7m"
                 if self.game.junme == 1: # 作弊一下
-                    player.tehai = ["1m","1m","1m","2m","3m","4m","5m","6m","7m","9m","9m","9m","9m","1z"]
+                    player.tehai = ["1m","1m","1m","2m","2m","2m","4m","4m","4m","7m","9m","9m","9m","1z"]
                 print(player.tehai, player.furo)
                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
@@ -745,15 +806,18 @@ class GameProcess():
                     cutting = self.game.cut(0)
                     player.is_ippatsu_junme = False
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
-                    for tenpai in tenpais: # 振聽
-                        if tenpai in player.furiten_pai:
+                    for tenpai in tenpais: # 振聽確認
+                        if tenpai in player.furiten_pai: # 立直振聽
                             player.furiten = True
+                        if tenpai in player.doujun_furiten_pai: # 同巡振聽
+                            player.doujun_furiten = True
                     if is_tenpai:
-                        if player.furiten:
+                        if player.furiten or player.doujun_furiten:
                             print("Tenpai!", str(tenpais), "furiten")
                         else:
                             print("Tenpai!", str(tenpais))
-                    is_other_action = self.check(cutting)
+                    is_chi_pon_inner, is_minkan = self.check(cutting)
+                    is_other_action = is_chi_pon_inner or is_minkan
                 else:
                     userinput = input(">>>").split(" ")
                     if "riichi" in userinput: # 立直
@@ -770,27 +834,52 @@ class GameProcess():
 
                     cutting = self.game.cut(int(userinput[0]))
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
+                    for tenpai in tenpais: # 振聽確認
+                        if tenpai in player.doujun_furiten_pai: # 同巡振聽
+                            player.doujun_furiten = True
                     if is_tenpai:
-                        print("Tenpai!", str(tenpais))
-                    is_other_action = self.check(cutting)
+                        print(player.furiten, player.doujun_furiten)
+                        if player.furiten or player.doujun_furiten:
+                            print("Tenpai!", str(tenpais), "furiten")
+                        else:
+                            print("Tenpai!", str(tenpais))
+
+
+                    if self.game.rinshankaihou_able: # 明槓&加槓翻嶺上牌、結束嶺上開花巡
+                        # 翻嶺上牌
+                        if is_minkan or is_kakan:
+                            self.game.rinshan.append(self.game.yama[0])
+                            del self.game.yama[0]
+                            print("rinshan:",self.game.rinshan)
+                        self.game.rinshankaihou_able = False
+
+                    is_chi_pon_inner, is_minkan = self.check(cutting)
+                    is_other_action = is_chi_pon_inner or is_minkan
 
             else: # 電腦出牌(自動摸切)
-                if is_chii_pon_kan:
+                if not is_to_draw:
                     pass 
                 else:
                     self.game.draw()
                 cutting = self.game.cut(0)
                 print(self.game.playing, ":", cutting)
-                is_other_action = self.check(cutting)
+                is_chi_pon_inner, is_minkan = self.check(cutting)
+                is_other_action = is_chi_pon_inner or is_minkan
 
             if is_other_action: # 有人鳴牌
                 count = MENFON_INDEX.index(self.game.playing)
-                is_chii_pon_kan = True
             else:
                 self.game.playing = MENFON_INDEX[(count+1)%4]
-                is_chii_pon_kan = False
                 count += 1
-        for m in MENFON_INDEX:
+            
+            if is_chi_pon_inner: # 下一位不摸牌
+                is_to_draw = False
+            else:
+                is_to_draw = True
+
+        # 流局滿貫 # 不計寶牌
+
+        for m in MENFON_INDEX: # 荒牌流局
             print(m, end=": ")
             if self.game.players[m].is_tenpai:
                 print("Tenpai:", player.tenpais)
@@ -798,7 +887,8 @@ class GameProcess():
                 print("No ten")
     
     def check(self, c:str) -> bool:
-        is_action = False
+        is_chi_pon = False
+        is_minkan = False
         playing_player = self.game.players[self.game.playing]
         # 榮和
         players = self.ron_able(c)
@@ -812,27 +902,48 @@ class GameProcess():
                         print(self.game.hansuu(player, "ron", c, output_yaku=True))
                         exit()
                     else:
-                        player.furiten_pai.append(c)
-                        player.furiten = True
+                        if player.is_riichi:
+                            player.furiten_pai.append(c)
+                            player.furiten = True
+
+        # 同巡振聽
+        for p in MENFON_INDEX:
+            if p == self.game.playing:
+                continue
+            player = self.game.players[p]
+            if self.game.is_agari(player.tehai.copy().append(c)):
+                player.doujun_furiten_pai = self.game.check_tenpai(player = player, overright=False)[1]
+                player.doujun_furiten = True
 
         # 碰
         players = self.pon_able(c)
         if len(players) != 0:
             for player in players:
-                if player.menfon == "N" and not player.is_riichi: # 測試用
+                if player.is_riichi:
+                    continue
+                if player.menfon == "N": # 測試用
                     print("you can pon")
                     userinput = input(">>>")
                     if userinput == "pon":
                         self.game.pon(pon_player = player, pon_ed_player = playing_player)
                         print("pon nia!")
-                        is_action = True
+                        is_chi_pon = True
         else:
             pass
 
-        # 槓
+        # 明槓
         players = self.kan_able(c)
         if len(players) != 0:
-            pass
+            for player in players:
+                if player.is_riichi:
+                    continue
+                if player.menfon == "N": # 測試用
+                    print("you can kan")
+                    userinput = input(">>>")
+                    if userinput == "kan":
+                        self.game.minkan(kan_player = player, kan_ed_player = playing_player)
+                        print("kan nia!")
+                        is_minkan = True
         else:
             pass
 
@@ -847,11 +958,11 @@ class GameProcess():
                     if userinput == "chi":
                         self.game.chi(chi_player = next_player, chi_ed_player = playing_player)
                         print("chi nia!")
-                        is_action = True
+                        is_chi_pon = True
         else:
             pass
 
-        return is_action
+        return is_chi_pon, is_minkan
     
     def ron_able(self, c:str) -> list[Player]:
         players = []

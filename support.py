@@ -241,9 +241,9 @@ def yaku_and_output(tehai9:list,hoorakei:list,did_tsumo:bool,is_karaten:bool,tsu
                     hansuu_yaku.append([4,s.sanankoo+s.ideographic_comma+s.toitoihoo+' ('+s.suuankoo+s.question_mark+')'])
                     is_yakuman=False
             else:
-                yaku.append(s.suuankoo+s.question_mark)
+                yaku.append(s.suuankoo)
                 hansuu+=13
-                hansuu_yaku.append([13,s.suuankoo+s.question_mark])
+                hansuu_yaku.append([13,s.suuankoo])
                 is_yakuman=True
             yaku.remove(s.toitoihoo)
             hansuu-=2
