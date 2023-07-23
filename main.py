@@ -104,6 +104,19 @@ def mentsu_judge(mentsu:list[str]) -> tuple[str, int or None]:
         pos += 1
     return 'ankan', None
 
+def pai_combin_tran(pai_combin:str):
+    """ '1z1z1z' -> '111z' '2z2z 3z3z3z 123s' -> '22z 333z 123z'"""
+    _list = pai_combin.split(" ")
+    newlist = []
+    for i in _list:
+        if len(i) == 6:
+            newlist.append(i[0]*3 + i[1])
+        elif len(i) == 4 and not i[1] in ('1','2','3','4','5','6','7','8','9'):
+            newlist.append(i[0]*2 + i[1])
+        else:
+            newlist.append(i)
+    return " ".join(newlist)
+
 class Player():
     def __init__(self, menfon:str, tehai:list, ):
         """menfon: 風\ntehai: 手牌 -> ["1m", "2m", ...]"""
@@ -435,8 +448,8 @@ class Game():
         else:
             return False
 
-    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, is_output_yaku = False, is_output_pai_combin = False, is_chyankan = False) -> int or tuple[int,list[list]] or tuple[int]:
-        # 飜數計算
+    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, is_chyankan = False, is_output_yaku = False, is_output_pai_combin = False, is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
+        """飜數計算 >>>`is_output_yaku` `is_output_pai_combin` `is_output_fusuu` 為向上必須"""
         yaku = []
         tehai = player.tehai.copy()
         if len(player.tehai) in (1,4,7,10,13): # 榮和
@@ -512,6 +525,10 @@ class Game():
         result = support.main(tehai=input_tehai, has_koyaku=False)
         hansuu_yaku_list = result[2]
         pai_combin_list = result[3]
+        temp = []
+        for pai_combin_ in pai_combin_list: # 調整格式
+            temp.append(pai_combin_tran(pai_combin_))
+        pai_combin_list = temp
         pos = -1
         del_pos_list = []
         for h in hansuu_yaku_list:
@@ -742,7 +759,7 @@ class Game():
         del_pos_list.reverse()
         for p in del_pos_list:
             del hansuu_yaku_list[p]
-        for p in pai_combin_list:
+        for p in del_pos_list:
             del pai_combin_list[p]
 
         # 合併、役滿特判
@@ -776,16 +793,19 @@ class Game():
         han = maximum
 
         output_yaku = max_set
-        output_pai_combin = pai_combin_list[pos]
+        output_pai_combin = pai_combin_tran(pai_combin_list[max_pos])
         if is_output_yaku:
             if is_output_pai_combin:
+                if is_output_fusuu:
+                    output_fusuu = self.fusuu()
+                    return han, output_yaku, output_pai_combin, output_fusuu
                 return han, output_yaku, output_pai_combin
             else:
                 return han, output_yaku
         else:
             return han
     
-    def fusuu(self):
+    def fusuu(self, menfon, chanfon, agari_hai, hansuu_data, tehai, furo) -> int:
         # 符數計算
         return 
     
