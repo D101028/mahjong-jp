@@ -805,8 +805,9 @@ class Game():
         else:
             return han
     
-    def fusuu(self, menfon, chanfon, agari_hai, hansuu_data, tehai, furo) -> int:
+    def fusuu(self, menfon:str, chanfon:str, agari_hai:str, hansuu_data, tehai:list[str], furo:list[list[str]]) -> int:
         # 符數計算
+        
         return 
     
     def tensuu(self):
