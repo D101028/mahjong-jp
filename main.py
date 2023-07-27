@@ -698,6 +698,7 @@ class Game():
             if kan == 4:
                 h.append([13, s.suukantsu])
             #     對對和/三暗刻/四暗刻/單騎
+            # 無法判斷使否為榮胡
             if [13, s.suuankoo] in h or [26, s.suuankootanki] in h:
                 ankan = 0
                 for i in player.furo:
@@ -805,10 +806,26 @@ class Game():
         else:
             return han
     
-    def fusuu(self, menfon:str, chanfon:str, agari_hai:str, hansuu_data, tehai:list[str], furo:list[list[str]]) -> int:
-        # 符數計算
-        
-        return 
+    def fusuu(self, 
+              menfon:str, 
+              chanfon:str, 
+              agari_hai:str, 
+              han_combin:list[list[int,str]], 
+              pai_combin:str, 
+              tehai:list[str], 
+              furo:list[list[str]]) -> int:
+        """符數計算"""
+        # 特判
+        if [2, s.chiitoitsu] in han_combin or [13, s.kokushimusou] in han_combin or [26, s.kokushimusoujuusanmen]:
+            return 25
+        fu = 20
+        # 面子
+
+        # 雀頭
+
+        # 聽牌
+
+        return fu
     
     def tensuu(self):
         # 點數計算

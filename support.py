@@ -155,8 +155,8 @@ def yaku_and_output(tehai9:list,hoorakei:list,did_tsumo:bool,is_karaten:bool,tsu
                 yaku.append(s.sanankoo)
                 hansuu_yaku.append([2,s.sanankoo])
             else:
-                yaku.append(s.sanankoo+s.question_mark)
-                hansuu_yaku.append([2,s.sanankoo+s.question_mark])
+                yaku.append(s.sanankoo)
+                hansuu_yaku.append([2,s.sanankoo])
             hansuu+=2
 
         #honroutou
@@ -248,10 +248,10 @@ def yaku_and_output(tehai9:list,hoorakei:list,did_tsumo:bool,is_karaten:bool,tsu
             yaku.remove(s.toitoihoo)
             hansuu-=2
             hansuu_yaku.remove([2,s.toitoihoo])
-            if s.sanankoo+s.question_mark in yaku:
-                yaku.remove(s.sanankoo+s.question_mark)
+            if s.sanankoo in yaku:
+                yaku.remove(s.sanankoo)
                 hansuu-=2
-                hansuu_yaku.remove([2,s.sanankoo+s.question_mark])
+                hansuu_yaku.remove([2,s.sanankoo])
             if s.sanankoo in yaku:
                 yaku.remove(s.sanankoo)
                 hansuu-=2
