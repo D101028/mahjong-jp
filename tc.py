@@ -27,6 +27,7 @@ less_than_13="{}張手牌，少於13張（可能有副露）"
 taapai_or_shaopai="{}張手牌，大相公或小相公"
 dora='寶牌'
 akadora='紅寶牌'
+uradora='裡寶牌'
 
 riichi='立直'
 ippatsu="一發"

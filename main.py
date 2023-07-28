@@ -70,7 +70,7 @@ def card_minus(userinput:str, z_contained = False, mod = False):
 def p_next(p:str):
     return MENFON_INDEX[(MENFON_INDEX.index(p) + 1) % 4]
 
-def akadorasuu_tran(tehai:list)->tuple[list,int]:
+def akadorasuu_tran(tehai:list[str])->tuple[list,int]:
     tehai = tehai.copy()
     count = 0
     dora = 0
@@ -116,6 +116,30 @@ def pai_combin_tran(pai_combin:str):
         else:
             newlist.append(i)
     return " ".join(newlist)
+
+def is_mentsu_equal(mentsu1:str, mentsu2:list):
+    """123m == [1m*,2m,3m]\n 111z != [1m,1m,1m]\n 1z1z1z == [1z,1z,1z]"""
+    # print(mentsu1,mentsu2)
+    if len(mentsu1) == 6:
+        mentsu1 = mentsu1[0]+mentsu1[2]+mentsu1[4]+mentsu1[5]
+    if mentsu1[3] == mentsu2[0][1]:
+        num1 = mentsu1[:3]
+        num2 = ""
+        for i in mentsu2:
+            num2 += i[0]
+        num2_list = list(num2)
+        num2_list.sort()
+        num2 = "".join(num2_list)
+        if num1 != num2:
+            return False
+        return True
+    return False
+
+def round_up(num:int, n:int):
+    if num % 10**n == 0:
+        return num 
+    else:
+        return (num//10**n+1)*10**n
 
 class Player():
     def __init__(self, menfon:str, tehai:list, ):
@@ -448,7 +472,13 @@ class Game():
         else:
             return False
 
-    def hansuu(self, player:Player = None, agari_type:str = "tsumo", ron_hai:str = None, is_chyankan = False, is_output_yaku = False, is_output_pai_combin = False, is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
+    def hansuu(self, player:Player = None, 
+               agari_type:str = "tsumo", 
+               ron_hai:str = None, 
+               is_chyankan = False, 
+               is_output_yaku = False, 
+               is_output_pai_combin = False, 
+               is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
         """飜數計算 >>>`is_output_yaku` `is_output_pai_combin` `is_output_fusuu` 為向上必須"""
         yaku = []
         tehai = player.tehai.copy()
@@ -552,23 +582,6 @@ class Game():
                         h.append([26, s.kokushimusoujuusanmen])
 
             # 和牌分割不合副露
-            def is_mentsu_equal(mentsu1:str, mentsu2:list):
-                """123m == [1m*,2m,3m]\n 111z != [1m,1m,1m]\n 1z1z1z == [1z,1z,1z]"""
-                # print(mentsu1,mentsu2)
-                if len(mentsu1) == 6:
-                    mentsu1 = mentsu1[0]+mentsu1[2]+mentsu1[4]+mentsu1[5]
-                if mentsu1[3] == mentsu2[0][1]:
-                    num1 = mentsu1[:3]
-                    num2 = ""
-                    for i in mentsu2:
-                        num2 += i[0]
-                    num2_list = list(num2)
-                    num2_list.sort()
-                    num2 = "".join(num2_list)
-                    if num1 != num2:
-                        return False
-                    return True
-                return False
             is_correct_furo = True
             if len(splitted_pai_combin) == 5:
                 for furo in player.furo.copy():
@@ -698,7 +711,6 @@ class Game():
             if kan == 4:
                 h.append([13, s.suukantsu])
             #     對對和/三暗刻/四暗刻/單騎
-            # 無法判斷使否為榮胡
             if [13, s.suuankoo] in h or [26, s.suuankootanki] in h:
                 ankan = 0
                 for i in player.furo:
@@ -736,6 +748,24 @@ class Game():
                         if normal_tehai.count(agari_hai) != 2:
                             h.remove([26, s.suuankootanki])
                             h.append([13, s.suuankoo])
+            if [2, s.sanankoo] in h and agari_type == "ron": # 三暗刻特判
+                m_temp  = mentsu_s.copy()
+                furo_temp = player.furo.copy()
+                del_num = []
+                count = 0
+                for mentsu in mentsu_s:
+                    for f in furo_temp:
+                        if is_mentsu_equal(mentsu, f):
+                            del_num.append(count)
+                            furo_temp.remove(f)
+                    count += 1
+                    del_num.reverse()
+                for i in del_num:
+                    del m_temp[i]
+                for mentsu in m_temp:
+                    if agari_hai == mentsu[0]+mentsu[-1]:
+                        h.remove([2, s.sanankoo])
+
             #     天地和/人和
             if self.junme == 1:
                 if player.menfon == "E":
@@ -753,7 +783,20 @@ class Game():
                     dorasuu += normal_tehai.count(d)
                 if dorasuu != 0:
                     h.append([dorasuu, s.dora])
-
+            
+            #     裡寶牌
+                if player.is_riichi:
+                    uradorasuu = 0
+                    uradora_pointer = []
+                    for i in self.rinshan:
+                        uradora_pointer.append(self.yama[-1])
+                        del self.yama[-1]
+                    uradora = [card_plus(i, True, True) for i in uradora_pointer]
+                    for i in uradora:
+                        if i in normal_tehai:
+                            uradorasuu += 1
+                    if uradorasuu != 0:
+                        h.append([uradorasuu, s.uradora])
 
         # 刪除不合之組合
         del_pos_list.sort()
@@ -807,13 +850,13 @@ class Game():
             return han
     
     def fusuu(self, 
-              menfon:str, 
-              chanfon:str, 
-              agari_hai:str, 
-              han_combin:list[list[int,str]], 
-              pai_combin:str, 
-              tehai:list[str], 
-              furo:list[list[str]]) -> int:
+              player:Player, 
+              agari_type:str = "tsumo", 
+              agari_hai:str = None, 
+              han_combin:list[list[int,str]] = None, 
+              pai_combin:list[str] = None, 
+              is_pinfu:bool = None
+              ) -> int:
         """符數計算"""
         # 特判
         if [2, s.chiitoitsu] in han_combin or [13, s.kokushimusou] in han_combin or [26, s.kokushimusoujuusanmen]:
@@ -908,6 +951,9 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
+                if self.game.junme == 1:
+                    player.tehai = ["1m","1m","1m","2m","2m","2m","5m","5m","8p","8p","1z"]
+                    player.furo = [["1s","2s*","3s"]]
                 print(player.tehai, player.furo)
                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
