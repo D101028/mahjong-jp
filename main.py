@@ -135,7 +135,7 @@ def is_mentsu_equal(mentsu1:str, mentsu2:list):
         return True
     return False
 
-def round_up(num:int, n:int):
+def round_up(num:int, n:int = 2):
     if num % 10**n == 0:
         return num 
     else:
@@ -480,6 +480,10 @@ class Game():
                is_output_pai_combin = False, 
                is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
         """飜數計算 >>>`is_output_yaku` `is_output_pai_combin` `is_output_fusuu` 為向上必須"""
+        if is_output_fusuu:
+            is_output_yaku, is_output_pai_combin = True, True
+        elif is_output_pai_combin:
+            is_output_yaku = True
         yaku = []
         tehai = player.tehai.copy()
         if len(player.tehai) in (1,4,7,10,13): # 榮和
@@ -841,7 +845,8 @@ class Game():
         if is_output_yaku:
             if is_output_pai_combin:
                 if is_output_fusuu:
-                    output_fusuu = self.fusuu()
+                    is_pinfu = [1,s.pinfu] in output_yaku
+                    output_fusuu = self.fusuu(player, agari_type, agari_hai, output_yaku, output_pai_combin.split(" "), is_pinfu)
                     return han, output_yaku, output_pai_combin, output_fusuu
                 return han, output_yaku, output_pai_combin
             else:
@@ -859,20 +864,135 @@ class Game():
               ) -> int:
         """符數計算"""
         # 特判
-        if [2, s.chiitoitsu] in han_combin or [13, s.kokushimusou] in han_combin or [26, s.kokushimusoujuusanmen]:
+        if [2, s.chiitoitsu] in han_combin or [13, s.kokushimusou] in han_combin or [26, s.kokushimusoujuusanmen]in han_combin:
             return 25
+        if is_pinfu:
+            if agari_type == "tsumo":
+                return 30
+            else:
+                return 20
+        # 底符
         fu = 20
+        # 門前加符
+        if agari_type == "ron" and player.is_menchin():
+            fu += 10
+        # 自摸
+        if agari_type == "tsumo":
+            fu += 2
+
         # 面子
-
+        toitsu = pai_combin[0]
+        furo = player.furo.copy()
+        tehai_temp = [] # 非副露之手牌
+        for i in pai_combin[1:]:
+            is_furo = False
+            for f in furo:
+                if is_mentsu_equal(i, f): # 副露 + 暗槓
+                    furo.remove(f)
+                    mentsu_type = mentsu_judge(f)[0]
+                    if mentsu_type == "juntsu":
+                        pass 
+                    elif mentsu_type == "koutsu": # 明刻
+                        if i[0] in ("1", "9") or i[-1] == "z": # 么九
+                            fu += 4
+                        else: 
+                            fu += 2
+                    elif mentsu_type == "minkan":
+                        if i[0] in ("1", "9") or i[-1] == "z":
+                            fu += 16
+                        else:
+                            fu += 8
+                    elif mentsu_type == "ankan":
+                        if i[0] in ("1", "9") or i[-1] == "z":
+                            fu += 32
+                        else:
+                            fu += 16
+                    is_furo = True
+                    break 
+            # 非副露
+            if not is_furo and i[0]==i[1]: # 暗刻
+                if i[0] in ("1", "9") or i[-1] == "z":
+                    fu += 8
+                else:
+                    fu += 4
+            tehai_temp.append(i)
         # 雀頭
-
-        # 聽牌
-
+        pai = toitsu[0]+toitsu[-1]
+        if pai in ("5z","6z","7z"): # 三元牌
+            fu += 2
+        dict_temp = {"E":"1z","S":"2z","W":"3z","N":"4z"}
+        if pai == dict_temp[player.menfon]:
+            fu += 2
+        if pai == dict_temp[self.chanfon]:
+            fu += 2
+        # 聽牌型
+        tanki = agari_hai == pai
+        kanchan = False
+        bienchan = False
+        if len(tehai_temp) != 0:
+            for i in tehai_temp:
+                if i[0:3] in ("123", "789"):
+                    if agari_hai in ("3"+i[-1], "7"+i[-1]):
+                        bienchan = True
+                if i[0:3] in ("123","234","345","456","567","678","789"):
+                    if agari_hai[-1] == i[-1]:
+                        if agari_hai[0] == i[1]:
+                            kanchan = True
+                if bienchan and kanchan:
+                    break
+        if tanki: # 單騎聽
+            fu += 2
+        elif bienchan: # 邊張聽
+            fu += 2
+        elif kanchan: # 崁張聽
+            fu += 2
+        fu = round_up(fu, 1)
         return fu
     
-    def tensuu(self):
+    def tensuu(self, hansuu:int, fusuu:int, is_banker:bool = False):
+        """output: [all, [閒家, 莊家]] or [all, [閒家]]"""
         # 點數計算
-        return 
+        # 青天井規則
+        # basic = fusuu*2**(hansuu+2)
+        # if is_banker:
+        #     return [round_up(basic*2*3,2), [round_up(basic*2)]]
+        # else:
+        #     return [round_up(basic*4,2), [round_up(basic, 2), round_up(basic*2)]]
+        
+        # 一般規則
+        if hansuu>=5 or (hansuu==4 and fusuu>=40) or (hansuu==3 and fusuu>=70):
+            if hansuu in (3,4,5):
+                if is_banker:
+                    return [12000,[4000]]
+                else:
+                    return [8000,[2000,4000]]
+            elif hansuu in (6,7):
+                if is_banker:
+                    return [18000,[6000]]
+                else:
+                    return [12000,[3000,6000]]
+            elif hansuu in (8,9,10):
+                if is_banker:
+                    return [24000,[8000]]
+                else:
+                    return [16000,[4000,8000]]
+            elif hansuu in (11,12):
+                if is_banker:
+                    return [36000,[12000]]
+                else:
+                    return [24000,[6000,12000]]
+            else:
+                if is_banker:
+                    return [48000,[16000]]
+                else:
+                    return [32000,[8000,16000]]
+        else:
+            basic = fusuu*2**(hansuu+2)
+            if is_banker:
+                return [round_up(basic*2*3,2), [round_up(basic*2)]]
+            else:
+                return [round_up(basic*4,2), [round_up(basic, 2), round_up(basic*2)]]
+
     
     def check_tenpai(self, player:Player = None, overright = True) -> tuple[bool, list[str]]:
         if player is None:
@@ -914,7 +1034,7 @@ class Game():
                 riichiable = True 
                 agari_pai.append(h)
         return riichiable, agari_pai
-# a = ""
+a = ""
 class GameProcess():
     def __init__(self):
         self.game = Game()
@@ -935,25 +1055,22 @@ class GameProcess():
                 else:
                     self.game.draw()
                 player = self.game.players["N"]
-                # global a
-                # if a == "4z": # 超級作弊
-                #     player.tehai[-1] = "3z"
-                #     a = "3z"
-                # elif a == "3z":
-                #     player.tehai[-1] = "2z"
-                #     a = "2z"
-                # elif a == "2z":
-                #     player.tehai[-1] = "1z"
-                #     a = "1z"
-                # elif a == "1z":
-                #     player.tehai[-1] = "5z"
-                #     a = "5z"
-                # if self.game.junme == 1: # 作弊一下
-                #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
-                #     a = "4z"
-                if self.game.junme == 1:
-                    player.tehai = ["1m","1m","1m","2m","2m","2m","5m","5m","8p","8p","1z"]
-                    player.furo = [["1s","2s*","3s"]]
+                global a
+                if a == "4z": # 超級作弊
+                    player.tehai[-1] = "3z"
+                    a = "3z"
+                elif a == "3z":
+                    player.tehai[-1] = "2z"
+                    a = "2z"
+                elif a == "2z":
+                    player.tehai[-1] = "1z"
+                    a = "1z"
+                elif a == "1z":
+                    player.tehai[-1] = "5z"
+                    a = "5z"
+                if self.game.junme == 1: # 作弊一下
+                    player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
+                    a = "4z"
                 print(player.tehai, player.furo)
                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
@@ -963,7 +1080,11 @@ class GameProcess():
                     print("you can tsumo!", end="")
                     if "tsumo" in input(">>>"):
                         print("You Win!!")
-                        print(self.game.hansuu(player=player, agari_type="tsumo", is_output_yaku=True))
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_output_fusuu=True)
+                        tensuu = self.game.tensuu(hansuu, fusuu, False)
+                        print(yaku_list)
+                        print(hansuu, "飜", fusuu, "符")
+                        print(tensuu)
                         exit()
 
                 furo_koutsu = [] # ex.["2m", "1z"]
@@ -1128,7 +1249,11 @@ class GameProcess():
                         userinput = input(">>>")
                         if userinput == "ron":
                             print("YOU WIN!")
-                            print(self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True))
+                            hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
+                            tensuu = self.game.tensuu(hansuu, fusuu, False)
+                            print(yaku_list)
+                            print(hansuu, "飜", fusuu, "符")
+                            print(tensuu)
                             exit()
                         else:
                             if player.is_riichi: # 立直振聽
@@ -1153,7 +1278,11 @@ class GameProcess():
                     userinput = input(">>>")
                     if userinput == "ron":
                         print("YOU WIN!")
-                        print(self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True))
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True, is_output_fusuu=True)
+                        tensuu = self.game.tensuu(hansuu, fusuu, False)
+                        print(yaku_list)
+                        print(hansuu, "飜", fusuu, "符")
+                        print(tensuu)
                         exit()
                     else:
                         if player.is_riichi: # 立直振聽
@@ -1173,7 +1302,11 @@ class GameProcess():
                     userinput = input(">>>")
                     if userinput == "ron":
                         print("YOU WIN!")
-                        print(self.game.hansuu(player, "ron", c, is_output_yaku=True))
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_output_fusuu=True)
+                        tensuu = self.game.tensuu(hansuu, fusuu, False)
+                        print(yaku_list)
+                        print(hansuu, "飜", fusuu, "符")
+                        print(tensuu)
                         exit()
                     else:
                         if player.is_riichi: # 立直振聽
@@ -1302,6 +1435,7 @@ class GameProcess():
 
 if __name__=="__main__":
     GameProcess()
+    print(Game.tensuu(None, 1, 30, False))
     # tehai = ["1z", "1z", "1z", "4z", "4z", "5m", "6m", "7m", "1s", "1s", "1s", "2s", "3s", "1s"]
     # print(Game.is_agari(self = None, tehai = tehai))
     # g = Game()
