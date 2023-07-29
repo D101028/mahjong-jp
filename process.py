@@ -59,7 +59,7 @@ class GameProcess():
                 if is_agari:
                     await self.send_message("you can tsumo!", end="")
                     if "tsumo" in await self.get_input(">>>"):
-                        await self.send_message("You Win!!")
+                        await self.send_message("tsumo nia!!")
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
@@ -243,7 +243,7 @@ class GameProcess():
                         await self.send_message("you can ron !")
                         userinput = await self.get_input(">>>")
                         if userinput == "ron":
-                            await self.send_message("YOU WIN!")
+                            await self.send_message("ron nia!")
                             hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
                             tensuu = self.game.tensuu(hansuu, fusuu, False)
                             await self.send_message(yaku_list)
@@ -272,7 +272,7 @@ class GameProcess():
                     await self.send_message("you can ron !")
                     userinput = await self.get_input(">>>")
                     if userinput == "ron":
-                        await self.send_message("YOU WIN!")
+                        await self.send_message("ron nia!")
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
@@ -296,7 +296,7 @@ class GameProcess():
                     await self.send_message("you can ron !")
                     userinput = await self.get_input(">>>")
                     if userinput == "ron":
-                        await self.send_message("YOU WIN!")
+                        await self.send_message("ron nia!")
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
