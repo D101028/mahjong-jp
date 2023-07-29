@@ -66,6 +66,8 @@ class GameProcess():
                         await self.send_message(hansuu, "飜", fusuu, "符")
                         await self.send_message(tensuu)
                         self.is_finished = True
+                if self.is_finished:
+                    break 
 
                 furo_koutsu = [] # ex.["2m", "1z"]
                 for h in player.furo:
