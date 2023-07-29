@@ -750,22 +750,43 @@ class Game():
                         if normal_tehai.count(agari_hai) != 2:
                             h.remove([26, s.suuankootanki])
                             h.append([13, s.suuankoo])
-            if [2, s.sanankoo] in h and agari_type == "ron": # 三暗刻特判
-                m_temp  = mentsu_s.copy()
-                furo_temp = player.furo.copy()
-                del_num = []
-                count = 0
-                for mentsu in mentsu_s:
-                    for f in furo_temp:
-                        if is_mentsu_equal(mentsu, f):
-                            del_num.append(count)
-                            furo_temp.remove(f)
-                    count += 1
-                    del_num.reverse()
-                for i in del_num:
-                    del m_temp[i]
-                for mentsu in m_temp:
-                    if agari_hai == mentsu[0]+mentsu[-1]:
+            if [2, s.sanankoo] in h: # 三暗刻特判
+                if agari_type == "ron":
+                    m_temp  = mentsu_s.copy()
+                    furo_temp = player.furo.copy()
+                    del_num = []
+                    count = 0
+                    for mentsu in mentsu_s:
+                        for f in furo_temp:
+                            if is_mentsu_equal(mentsu, f):
+                                del_num.append(count)
+                                furo_temp.remove(f)
+                        count += 1
+                        del_num.reverse()
+                    for i in del_num:
+                        del m_temp[i]
+                    for mentsu in m_temp:
+                        if agari_hai == mentsu[0]+mentsu[-1]:
+                            h.remove([2, s.sanankoo])
+                else:
+                    m_temp = mentsu_s.copy()
+                    furo_temp = player.furo.copy()
+                    ankousuu = 0
+                    del_num = []
+                    count = 0
+                    for mentsu in mentsu_s:
+                        for f in furo_temp:
+                            if is_mentsu_equal(mentsu, f):
+                                del_num.append(count)
+                                furo_temp.remove(f)
+                        count += 1
+                        del_num.reverse()
+                    for i in del_num:
+                        del m_temp[i]
+                    for mentsu in m_temp:
+                        if mentsu[0] == mentsu[1]:
+                            ankousuu += 1
+                    if ankousuu < 3:
                         h.remove([2, s.sanankoo])
 
             #     天地和/人和
@@ -1069,6 +1090,9 @@ class Game():
 #                 # if self.game.junme == 1: # 作弊一下
 #                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
 #                 #     a = "4z"
+#                 # if self.game.junme == 2:
+#                 #     player.tehai = ['4p', '4p', '4p','6p', '6p', '6p','6z', '6z', '7z', '7z', '6z']
+#                 #     player.furo =  [['3m*', '1m', '2m']] 
 #                 print(player.tehai, player.furo)
 #                 print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
