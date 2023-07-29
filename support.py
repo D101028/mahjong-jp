@@ -1,4 +1,4 @@
-import tc
+from lang import tc
 s = tc
 
 def output_hai(tehai1:int,is_number_only:bool=False,jihai_in_kanji:bool=True)->str:
