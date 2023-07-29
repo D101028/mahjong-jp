@@ -1062,7 +1062,7 @@ class Game():
 #         is_to_draw = True # 是否摸牌
 #         is_ankan_out = False # 紀錄上一次是否為暗槓
 #         count = 0
-#         while len(self.game.yama) > 14:
+        # while len(self.game.yama) > 14 or (len(self.game.yama)==14 and not is_to_draw):
 #             is_other_action = False # 是否有人鳴牌
 #             is_chi_pon_inner = False 
 #             is_minkan = False 

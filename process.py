@@ -21,7 +21,7 @@ class GameProcess():
         is_to_draw = True # 是否摸牌
         is_ankan_out = False # 紀錄上一次是否為暗槓
         count = 0
-        while len(self.game.yama) > 14:
+        while len(self.game.yama) > 14 or (len(self.game.yama)==14 and not is_to_draw):
             if self.is_finished:
                 return
             is_other_action = False # 是否有人鳴牌
