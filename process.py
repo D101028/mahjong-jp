@@ -51,6 +51,8 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
+                if self.game.junme == 1:
+                    player.tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","1s","2s","3s","7s","8s"]
                 await self.send_message(player.tehai, player.furo)
                 await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
@@ -200,13 +202,13 @@ class GameProcess():
                 is_ankan_out = False
 
         # 流局滿貫 # 不計寶牌
-
-        for m in MENFON_INDEX: # 荒牌流局
-            await self.send_message(m + ": ")
-            if self.game.players[m].is_tenpai:
-                await self.send_message("Tenpai:", player.tenpais)
-            else:
-                await self.send_message("No ten")
+        if not self.is_finished:
+            for m in MENFON_INDEX: # 荒牌流局
+                await self.send_message(m + ": ")
+                if self.game.players[m].is_tenpai:
+                    await self.send_message("Tenpai:", player.tenpais)
+                else:
+                    await self.send_message("No ten")
     
     async def send_message(self, *values, end = None):
         string = "```\n"
@@ -359,7 +361,32 @@ class GameProcess():
                     await self.send_message("you can chi")
                     userinput = await self.get_input(">>>")
                     if userinput == "chi":
-                        self.game.chi(chi_player = next_player, chi_ed_player = playing_player)
+                        chi_ed_player = playing_player
+                        chi_player = next_player
+
+                        chi_pai = chi_ed_player.river[-1]
+                        could_furo = []
+                        minus1 = card_minus(chi_pai)
+                        minus2 = card_minus(minus1)
+                        plus1 = card_plus(chi_pai)
+                        plus2 = card_plus(plus1)
+                        if plus1 in chi_player.tehai and plus2 in chi_player.tehai:
+                            could_furo.append([chi_pai, plus1, plus2])
+                        if minus1 in chi_player.tehai and plus1 in chi_player.tehai:
+                            could_furo.append([minus1, chi_pai, plus1])
+                        if minus2 in chi_player.tehai and minus1 in chi_player.tehai:
+                            could_furo.append([minus2, minus1, chi_pai])
+                        chi_num = 0
+                        if chi_player.menfon == "N": # 測試用
+                            if len(could_furo) > 1:
+                                count = 0
+                                for i in could_furo:
+                                    count += 1
+                                    await self.send_message(count, ":", i)
+                                userinput = int(await self.get_input(">>>"))
+                                chi_num = userinput - 1
+
+                        self.game.chi(chi_player = next_player, chi_ed_player = playing_player, could_furo = could_furo, chi_num = chi_num)
                         await self.send_message("chi nia!")
                         is_chi_pon = True
         

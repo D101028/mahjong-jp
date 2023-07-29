@@ -274,7 +274,7 @@ class Game():
         return cutting
 
 
-    def chi(self, chi_player:Player, chi_ed_player:Player):
+    def chi(self, chi_player:Player, chi_ed_player:Player, could_furo:list, chi_num:int):
         # 吃牌處理
         for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
@@ -284,26 +284,7 @@ class Game():
 
         chi_pai = chi_ed_player.river[-1]
         del chi_ed_player.river[-1]
-        could_furo = []
-        minus1 = card_minus(chi_pai)
-        minus2 = card_minus(minus1)
-        plus1 = card_plus(chi_pai)
-        plus2 = card_plus(plus1)
-        if plus1 in chi_player.tehai and plus2 in chi_player.tehai:
-            could_furo.append([chi_pai, plus1, plus2])
-        if minus1 in chi_player.tehai and plus1 in chi_player.tehai:
-            could_furo.append([minus1, chi_pai, plus1])
-        if minus2 in chi_player.tehai and minus1 in chi_player.tehai:
-            could_furo.append([minus2, minus1, chi_pai])
-        chi_num = 0
-        if chi_player.menfon == "N": # 測試用
-            if len(could_furo) > 1:
-                count = 0
-                for i in could_furo:
-                    count += 1
-                    print(count, ":", i)
-                userinput = int(input(">>>"))
-                chi_num = userinput - 1
+        
         furo = []
         furo.append(chi_pai+"*")
         for i in could_furo[chi_num]:
@@ -1244,12 +1225,13 @@ class GameProcessTest():
 
         # 流局滿貫 # 不計寶牌
 
-        for m in MENFON_INDEX: # 荒牌流局
-            print(m, end=": ")
-            if self.game.players[m].is_tenpai:
-                print("Tenpai:", player.tenpais)
-            else:
-                print("No ten")
+        if not self.is_finished:
+            for m in MENFON_INDEX: # 荒牌流局
+                print(m + ": ")
+                if self.game.players[m].is_tenpai:
+                    print("Tenpai:", player.tenpais)
+                else:
+                    print("No ten")
     
     def kokushi_chyankan_check(self, kan_pai:str):
         """國士無雙搶暗槓"""
@@ -1388,7 +1370,32 @@ class GameProcessTest():
                     print("you can chi")
                     userinput = input(">>>")
                     if userinput == "chi":
-                        self.game.chi(chi_player = next_player, chi_ed_player = playing_player)
+                        chi_ed_player = playing_player
+                        chi_player = next_player
+
+                        chi_pai = chi_ed_player.river[-1]
+                        could_furo = []
+                        minus1 = card_minus(chi_pai)
+                        minus2 = card_minus(minus1)
+                        plus1 = card_plus(chi_pai)
+                        plus2 = card_plus(plus1)
+                        if plus1 in chi_player.tehai and plus2 in chi_player.tehai:
+                            could_furo.append([chi_pai, plus1, plus2])
+                        if minus1 in chi_player.tehai and plus1 in chi_player.tehai:
+                            could_furo.append([minus1, chi_pai, plus1])
+                        if minus2 in chi_player.tehai and minus1 in chi_player.tehai:
+                            could_furo.append([minus2, minus1, chi_pai])
+                        chi_num = 0
+                        if chi_player.menfon == "N": # 測試用
+                            if len(could_furo) > 1:
+                                count = 0
+                                for i in could_furo:
+                                    count += 1
+                                    print(count, ":", i)
+                                userinput = int(input(">>>"))
+                                chi_num = userinput - 1
+
+                        self.game.chi(chi_player = next_player, chi_ed_player = playing_player, could_furo = could_furo, chi_num = chi_num)
                         print("chi nia!")
                         is_chi_pon = True
         
