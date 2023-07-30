@@ -1079,7 +1079,8 @@ class GameProcessTest():
                     player.tehai = ['1p', '1p', '5p', '6p', '7p', '1s', '1s', '1s', '6s', '6s', '1z']
                     player.furo = [['9p', '9p', '9p*']]
                 print(player.tehai, player.furo)
-                print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
+                if not player.is_riichi:
+                    print("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
                 # 自摸
                 is_agari = (self.game.hansuu(player, "tsumo") != 0)

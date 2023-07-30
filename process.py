@@ -51,10 +51,11 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
-                if self.game.junme == 1:
-                    player.tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","1s","2s","3s","7s","8s"]
+                # if self.game.junme == 1:
+                #     player.tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","1s","2s","3s","7s","8s"]
                 await self.send_message(player.tehai, player.furo)
-                await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
+                if not player.is_riichi:
+                    await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
                 # 自摸
                 is_agari = (self.game.hansuu(player, "tsumo") != 0)
