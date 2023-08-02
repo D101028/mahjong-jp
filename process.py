@@ -14,8 +14,15 @@ class GameProcess():
         self.bot = bot
         self.is_listening = True
     async def _init(self):
+        self.river_message = await self.ctx.send("River Message")
+        self.tehai_message = await self.ctx.send("Tehai Message")
+        self.tempai_message_text = ""
+
         self.game = Game()
-        await self.send_message("rinshan:", self.game.rinshan)
+        await self.refresh_tehai()
+        await self.show_river()
+        # await self.send_message()
+
         self.is_finished = False
 
         is_to_draw = True # 是否摸牌
@@ -24,6 +31,8 @@ class GameProcess():
         while len(self.game.yama) > 14 or (len(self.game.yama)==14 and not is_to_draw):
             if self.is_finished:
                 return
+            # await self.refresh_tehai()
+            await self.refresh_river()
             is_other_action = False # 是否有人鳴牌
             is_chi_pon_inner = False 
             is_minkan = False 
@@ -53,9 +62,10 @@ class GameProcess():
                 #     a = "4z"
                 # if self.game.junme == 1:
                 #     player.tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","1s","2s","3s","7s","8s"]
-                await self.send_message(player.tehai, player.furo)
-                if not player.is_riichi:
-                    await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
+                await self.refresh_tehai()
+                # await self.send_message(player.tehai, player.furo)
+                # if not player.is_riichi:
+                #     await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
                 # 自摸
                 is_agari = (self.game.hansuu(player, "tsumo") != 0)
@@ -113,6 +123,8 @@ class GameProcess():
                 if player.is_riichi: # 立直摸切
                     time.sleep(3)
                     cutting = self.game.cut(0)
+                    await self.refresh_tehai()
+                    await self.refresh_river()
                     player.is_ippatsu_junme = False
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
                     for tenpai in tenpais: # 振聽確認
@@ -125,10 +137,14 @@ class GameProcess():
                         else:
                             player.doujun_furiten = False
                     if is_tenpai:
+                        msg = ""
                         if player.furiten or player.doujun_furiten:
-                            await self.send_message("Tenpai!", str(tenpais), "furiten")
+                            msg = "Tenpai!"+" "+str(tenpais)+" "+"furiten"
                         else:
-                            await self.send_message("Tenpai!", str(tenpais))
+                            msg = "Tenpai!"+" "+str(tenpais)
+                        if self.tempai_message_text != msg:
+                                self.tempai_message_text = msg
+
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
                     is_other_action = is_chi_pon_inner or is_minkan
                 elif not is_kakan and not is_ankan: # 槓完直接進下一迴圈(同理摸嶺上牌)
@@ -147,6 +163,8 @@ class GameProcess():
                             await self.send_message("相公 (指)(怒)")
 
                     cutting = self.game.cut(int(userinput[0]))
+                    await self.refresh_tehai()
+                    await self.refresh_river()
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
                     for tenpai in tenpais: # 振聽確認
                         if tenpai in player.furiten_pai: # 捨牌、立直振聽
@@ -158,10 +176,13 @@ class GameProcess():
                         else:
                             player.doujun_furiten = False
                     if is_tenpai:
+                        msg = ""
                         if player.furiten or player.doujun_furiten:
-                            await self.send_message("Tenpai!", str(tenpais), "furiten")
+                            msg = "Tenpai!"+" "+str(tenpais)+" "+"furiten"
                         else:
-                            await self.send_message("Tenpai!", str(tenpais))
+                            msg = "Tenpai!"+" "+str(tenpais)
+                        if self.tempai_message_text != msg:
+                                self.tempai_message_text = msg
 
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
                     is_other_action = is_chi_pon_inner or is_minkan
@@ -172,7 +193,7 @@ class GameProcess():
                         else: # 明加槓翻寶牌指示牌
                             self.game.rinshan.append(self.game.yama[0])
                             del self.game.yama[0]
-                            await self.send_message("rinshan:",self.game.rinshan)
+                            # await self.send_message("rinshan:",self.game.rinshan)
                         self.game.rinshankaihou_able = False
 
 
@@ -182,7 +203,9 @@ class GameProcess():
                 else:
                     self.game.draw()
                 cutting = self.game.cut(0)
-                await self.send_message(self.game.playing, ":", cutting)
+                await self.refresh_tehai()
+                await self.refresh_river()
+                # await self.send_message(self.game.playing, ":", cutting)
                 is_chi_pon_inner, is_minkan = await self.check(cutting)
                 is_other_action = is_chi_pon_inner or is_minkan
 
@@ -211,18 +234,21 @@ class GameProcess():
                 else:
                     await self.send_message("No ten")
     
-    async def send_message(self, *values, end = None):
+    async def send_message(self, *values, end = None) -> discord.Message:
         string = "```\n"
         for value in values:
             string += str(value) + " "
         string += "\n```"
-        await self.ctx.send(string)
+        msg = await self.ctx.send(string)
+        return msg
 
-    async def get_input(self, *values):
+    async def get_input(self, *values, is_delete_message = True):
         msg = await self.bot.wait_for("message")
         content = msg.content
         if content[:3] == "```":
             content = await self.get_input()
+        if is_delete_message:
+            await msg.delete()
         return content
 
     async def kokushi_chyankan_check(self, kan_pai:str):
@@ -308,6 +334,7 @@ class GameProcess():
                         await self.send_message(hansuu, "飜", fusuu, "符")
                         await self.send_message(tensuu)
                         self.is_finished = True
+                        return is_chi_pon, is_minkan
                     else:
                         if player.is_riichi: # 立直振聽
                             player.furiten_pai.append(c)
@@ -331,12 +358,13 @@ class GameProcess():
                 if player.is_riichi:
                     continue
                 if player.menfon == "N": # 測試用
-                    await self.send_message("you can pon")
+                    msg = await self.send_message("you can pon")
                     userinput = await self.get_input(">>>")
                     if userinput == "pon":
                         self.game.pon(pon_player = player, pon_ed_player = playing_player)
                         await self.send_message("pon nia!")
                         is_chi_pon = True
+                    await msg.delete()
         
         # 明槓
         players = await self.kan_able(c)
@@ -345,13 +373,14 @@ class GameProcess():
                 if player.is_riichi:
                     continue
                 if player.menfon == "N": # 測試用
-                    await self.send_message("you can kan")
+                    msg = await self.send_message("you can kan")
                     userinput = await self.get_input(">>>")
                     if userinput == "kan":
                         self.game.minkan(kan_player = player, kan_ed_player = playing_player)
                         await self.send_message("kan nia!")
                         await self.chyankan_check(c)
                         is_minkan = True
+                    await msg.delete()
         
         # 吃
         players = await self.chi_able(c)
@@ -359,7 +388,7 @@ class GameProcess():
             next_player = self.game.players[p_next(self.game.playing)]
             if next_player in players:
                 if next_player.menfon == "N": # 測試用
-                    await self.send_message("you can chi")
+                    msg = await self.send_message("you can chi")
                     userinput = await self.get_input(">>>")
                     if userinput == "chi":
                         chi_ed_player = playing_player
@@ -390,7 +419,7 @@ class GameProcess():
                         self.game.chi(chi_player = next_player, chi_ed_player = playing_player, could_furo = could_furo, chi_num = chi_num)
                         await self.send_message("chi nia!")
                         is_chi_pon = True
-        
+                    await msg.delete()
         return is_chi_pon, is_minkan
     
     async def ron_able(self, c:str) -> list[Player]:
@@ -454,4 +483,44 @@ class GameProcess():
             if boolean1 or boolean2 or boolean3:
                 players.append(player)
         return players
+
+    async def refresh_river(self):
+        playing_msg = {
+            "E":"", "S":"", "W":"", "N":""
+        }
+        playing_msg[self.game.playing] = " **"
+        river_msg = "```"
+        river_msg += "rinshan:" + " " + str(self.game.rinshan) + "\n\n"
+        river_msg += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"].river)
+        river_msg += "南" + playing_msg["S"] + "\n" + await self.river_tran(self.game.players["S"].river)
+        river_msg += "西" + playing_msg["W"] + "\n" + await self.river_tran(self.game.players["W"].river)
+        river_msg += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"].river)
+
+        river_msg += "```"
+        await self.river_message.edit(content=river_msg)
+
+    async def refresh_tehai(self):
+        player = self.game.players["N"]
+        tehai_message = "```" + str(player.tehai) + "\n" + str(player.furo) + "\n  1     2     3     4     5     6     7     8     9     10    11    12    13    14```"
+        tehai_message += "\n" + self.tempai_message_text
+        await self.tehai_message.edit(content=tehai_message)
+
+    async def show_river(self):
+        rinshan_message = "rinshan:" + " " + str(self.game.rinshan)
+        river_msg = "```{}```".format(rinshan_message+"\n\n東\n\n\n\n\n南\n\n\n\n\n西\n\n\n\n\n北\n\n\n\n ")
+        await self.river_message.edit(content = river_msg)
+
+    async def river_tran(self, river_list:list[str]) -> str:
+        count = 0
+        line_num = 1
+        string = ""
+        for t in river_list:
+            count += 1
+            string += t + " "
+            if count == 6:
+                string += "\n"
+                line_num += 1
+                count = 0
+        string += " \n"*(5-line_num)
+        return string
 

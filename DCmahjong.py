@@ -30,7 +30,7 @@ async def say_hi(ctx):
 
 
 @bot.command()
-async def ping(ctx):
+async def ping(ctx:commands.Context):
     await ctx.send(bot.latency)
 
 @bot.command()
@@ -39,7 +39,7 @@ async def mjtest(ctx:commands.Context):
 
 @bot.command()
 async def test(ctx):
-    print(await Test(bot = bot))
+    await Test(ctx, bot)
 
 if __name__=="__main__":
     bot.run(token)
