@@ -5,7 +5,6 @@ import os
 # from game import Game, GameProcess
 from process import *
 import shutil
-from test import Test
 with open("./setting.json", mode = "rb") as file:
     data = file.read()
 setting = json.loads(data)
@@ -39,7 +38,7 @@ async def mjtest(ctx:commands.Context):
 
 @bot.command()
 async def test(ctx):
-    await Test(ctx, bot)
+    pass
 
 if __name__=="__main__":
     bot.run(token)

@@ -144,6 +144,7 @@ class GameProcess():
                             msg = "Tenpai!"+" "+str(tenpais)
                         if self.tempai_message_text != msg:
                                 self.tempai_message_text = msg
+                        await self.refresh_tehai()
 
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
                     is_other_action = is_chi_pon_inner or is_minkan
@@ -183,6 +184,7 @@ class GameProcess():
                             msg = "Tenpai!"+" "+str(tenpais)
                         if self.tempai_message_text != msg:
                                 self.tempai_message_text = msg
+                        await self.refresh_tehai()
 
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
                     is_other_action = is_chi_pon_inner or is_minkan
@@ -203,7 +205,7 @@ class GameProcess():
                 else:
                     self.game.draw()
                 cutting = self.game.cut(0)
-                await self.refresh_tehai()
+                # await self.refresh_tehai()
                 await self.refresh_river()
                 # await self.send_message(self.game.playing, ":", cutting)
                 is_chi_pon_inner, is_minkan = await self.check(cutting)
@@ -226,6 +228,8 @@ class GameProcess():
                 is_ankan_out = False
 
         # 流局滿貫 # 不計寶牌
+        
+
         if not self.is_finished:
             for m in MENFON_INDEX: # 荒牌流局
                 await self.send_message(m + ": ")

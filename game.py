@@ -194,24 +194,24 @@ class Game():
         self.yama = yama # 牌山序列
         self.playing = "E" # 打出玩家
         d = self.deal()
-        self.players_status = {
-            # [河面, 手牌, 副露]
-            # chi: [1m*, 2m, 3m] (上 對 下)
-            # pon: [1m, 1m, 1m*]
-            # minkan: [1z, 1z**, 1z]
-            # ankan: [1z, 1z, 1z]
-            # kakan: [1z, 1z***, 1z]
+        # self.players_status = {
+        #     # [河面, 手牌, 副露]
+        #     # chi: [1m*, 2m, 3m] (上 對 下)
+        #     # pon: [1m, 1m, 1m*]
+        #     # minkan: [1z, 1z**, 1z]
+        #     # ankan: [1z, 1z, 1z]
+        #     # kakan: [1z, 1z***, 1z]
 
-            "E": [[], self.sort(d[0]), []],
-            "S": [[], self.sort(d[1]), []],
-            "W": [[], self.sort(d[2]), []],
-            "N": [[], self.sort(d[3]), []],
-        }
+        #     "E": [[], self.sort(d[0]), []],
+        #     "S": [[], self.sort(d[1]), []],
+        #     "W": [[], self.sort(d[2]), []],
+        #     "N": [[], self.sort(d[3]), []],
+        # }
         self.players = {
-            "E": Player(menfon = "E", tehai = self.sort(d[1])),
+            "E": Player(menfon = "E", tehai = self.sort(d[0])),
             "S": Player(menfon = "S", tehai = self.sort(d[1])),
-            "W": Player(menfon = "W", tehai = self.sort(d[1])),
-            "N": Player(menfon = "N", tehai = self.sort(d[1])),
+            "W": Player(menfon = "W", tehai = self.sort(d[2])),
+            "N": Player(menfon = "N", tehai = self.sort(d[3])),
         }
         self.chanfon = "E"
         self.junme = 0 # 巡數
@@ -1298,7 +1298,7 @@ class GameProcessTest():
                             player.furiten_pai.append(kan_pai)
                             player.furiten = True
 
-    def check(self, c:str) -> bool:
+    def check(self, c:str) -> tuple[bool]:
         is_chi_pon = False
         is_minkan = False
         playing_player = self.game.players[self.game.playing]
