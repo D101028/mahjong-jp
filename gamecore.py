@@ -377,7 +377,7 @@ class Game():
         # 翻寶牌指示牌
         self.rinshan.append(self.yama[0])
         del self.yama[0]
-        print("rinshan:",self.rinshan)
+        # print("rinshan:",self.rinshan)
 
         # 嶺上開花巡
         self.rinshankaihou_able = True

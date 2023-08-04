@@ -8,7 +8,7 @@ async def create_process(bot:commands.Bot, ctx:commands.Context):
     process = GameProcess(bot = bot, ctx = ctx)
     await process._init()
 
-
+a="4z"
 class GameProcess():
     def __init__(self, bot:commands.Bot, ctx:commands.Context):
         self.ctx = ctx
@@ -72,8 +72,8 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
-                if self.game.junme == 1:
-                    player.tehai = ["1z","1z","1z","1z","2z","2z","1m","2m","3m","4m","5m","6m","7m","8m"]
+                # if self.game.junme == 1:
+                #     player.tehai = ["1z","1z","1z","1z","2z","2z","1m","2m","3m","4m","5m","6m","7m","8m"]
                 await self.refresh_tehai()
                 # await self.send_message(player.tehai, player.furo)
                 # if not player.is_riichi:
@@ -560,7 +560,7 @@ class GameProcess():
             m_type, pos =  mentsu_judge(t)
             if pos is None: # 暗槓
                 emoji = self.text_emoji_dict[t[0][0] + t[0][1]]
-                string += f"{emoji}{emoji}{emoji}{emoji}"
+                string += f"{emoji}{emoji}{emoji}{emoji}."
             else:
                 if m_type == "kakan":
                     string = ""
@@ -569,6 +569,7 @@ class GameProcess():
                         string += f"{emoji}"
                         if count == pos:
                             string += "***"
+                    string += "."
                 elif m_type == "minkan":
                     string = ""
                     for count in range(3):
@@ -576,6 +577,7 @@ class GameProcess():
                         string += f"{emoji}"
                         if count == pos:
                             string += "**"
+                    string += "."
                 elif m_type == "koutsu":
                     string = ""
                     for count in range(3):
@@ -583,6 +585,7 @@ class GameProcess():
                         string += f"{emoji}"
                         if count == pos:
                             string += "*"
+                    string += "."
                 else:
                     string = ""
                     for count in range(3):
@@ -590,6 +593,7 @@ class GameProcess():
                         string += f"{emoji}"
                         if count == pos:
                             string += "*"
+                    string += "."
         return string 
 
     async def pai_list_emoji_tran(self, pai_list:list[str]) -> str:
