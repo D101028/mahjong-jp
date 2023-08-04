@@ -1,3 +1,6 @@
+import discord 
+from discord.ext import commands
+
 INDEX = [
     ["1m","2m","3m","4m","5m","6m","7m","8m","9m",
      "1p","2p","3p","4p","5p","6p","7p","8p","9p",
@@ -20,8 +23,18 @@ INDEX = [
      "1p","2p","3p","4p","5p","6p","7p","8p","9p","1p","2p","3p","4p","5p","6p","7p","8p","9p","1p","2p","3p","4p","5p","6p","7p","8p","9p","1p","2p","3p","4p","5p","6p","7p","8p","9p",
      "1s","2s","3s","4s","5s","6s","7s","8s","9s","1s","2s","3s","4s","5s","6s","7s","8s","9s","1s","2s","3s","4s","5s","6s","7s","8s","9s","1s","2s","3s","4s","5s","6s","7s","8s","9s",
      "1z","2z","3z","4z","5z","6z","7z","1z","2z","3z","4z","5z","6z","7z","1z","2z","3z","4z","5z","6z","7z","1z","2z","3z","4z","5z","6z","7z",
-     ]
+     ], 
+    # 字牌
+    ["1z", "2z", "3z", "4z", "5z", "6z", "7z"], 
+    # 數牌
+    ["1m", "2m", "3m", "4m", "5m", "6m", "7m", "8m", "9m", 
+     "1s", "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", 
+     "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", 
+     "0m", "0s", "0p"]
 ]
 
-if __name__ == "__main__":
-    print(len(INDEX[2]))
+def get_emoji(ctx:commands.Context, name):
+    for emoji in ctx.guild.emojis:
+        if emoji.name == name:
+            return emoji
+    return ""

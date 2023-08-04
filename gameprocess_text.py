@@ -1,7 +1,8 @@
-from game import *
+from gamecore import *
 import discord
 from discord.ext import commands
 import asyncio
+from ext.support import get_emoji, INDEX
 
 async def create_process(bot:commands.Bot, ctx:commands.Context):
     process = GameProcess(bot = bot, ctx = ctx)
@@ -13,6 +14,17 @@ class GameProcess():
         self.ctx = ctx
         self.bot = bot
         self.is_listening = True
+        self.emoji_list = ctx.guild.emojis
+        self.text_emoji_dict = {}
+        # 字牌表符確認
+        for e in self.emoji_list:
+            if e.name in INDEX[3]:
+                self.text_emoji_dict[e.name] = e
+        # 數牌表符確認
+        for e in self.emoji_list:
+            if e.name in INDEX[4]:
+                self.text_emoji_dict[e.name] = e
+
     async def _init(self):
         self.river_message = await self.ctx.send("River Message")
         self.tehai_message = await self.ctx.send("Tehai Message")
@@ -20,7 +32,7 @@ class GameProcess():
 
         self.game = Game()
         await self.refresh_tehai()
-        await self.show_river()
+        await self.refresh_river()
         # await self.send_message()
 
         self.is_finished = False
@@ -60,8 +72,8 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
-                # if self.game.junme == 1:
-                #     player.tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","1s","2s","3s","7s","8s"]
+                if self.game.junme == 1:
+                    player.tehai = ["1z","1z","1z","1z","2z","2z","1m","2m","3m","4m","5m","6m","7m","8m"]
                 await self.refresh_tehai()
                 # await self.send_message(player.tehai, player.furo)
                 # if not player.is_riichi:
@@ -197,6 +209,7 @@ class GameProcess():
                             del self.game.yama[0]
                             # await self.send_message("rinshan:",self.game.rinshan)
                         self.game.rinshankaihou_able = False
+                # print(player.is_menchin(), player.tehai, player.furo)
 
 
             else: # 電腦出牌(自動摸切)
@@ -493,38 +506,96 @@ class GameProcess():
             "E":"", "S":"", "W":"", "N":""
         }
         playing_msg[self.game.playing] = " **"
-        river_msg = "```"
-        river_msg += "rinshan:" + " " + str(self.game.rinshan) + "\n\n"
+        river_msg = "------------------------\n"
+        # river_msg = "```"
+        river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.rinshan) + "\n\n"
         river_msg += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"].river)
         river_msg += "南" + playing_msg["S"] + "\n" + await self.river_tran(self.game.players["S"].river)
         river_msg += "西" + playing_msg["W"] + "\n" + await self.river_tran(self.game.players["W"].river)
         river_msg += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"].river)
 
-        river_msg += "```"
+        river_msg += "\n------------------------"
         await self.river_message.edit(content=river_msg)
 
     async def refresh_tehai(self):
         player = self.game.players["N"]
-        tehai_message = "```" + str(player.tehai) + "\n" + str(player.furo) + "\n  1     2     3     4     5     6     7     8     9     10    11    12    13    14```"
+        tehai_message = ""
+        tehai_message += await self.tehai_tran(player=player) + "```1  2  3  4  5  6  7  8  9  10 11 12 13 14```"
         tehai_message += "\n" + self.tempai_message_text
         await self.tehai_message.edit(content=tehai_message)
 
-    async def show_river(self):
-        rinshan_message = "rinshan:" + " " + str(self.game.rinshan)
-        river_msg = "```{}```".format(rinshan_message+"\n\n東\n\n\n\n\n南\n\n\n\n\n西\n\n\n\n\n北\n\n\n\n ")
-        await self.river_message.edit(content = river_msg)
+    # async def show_river(self):
+    #     rinshan_message = "rinshan:" + " " + str(self.game.rinshan)
+    #     river_msg = "```{}```".format(rinshan_message+"\n\n東\n\n\n\n\n南\n\n\n\n\n西\n\n\n\n\n北\n\n\n\n.")
+    #     await self.river_message.edit(content = river_msg)
 
-    async def river_tran(self, river_list:list[str]) -> str:
+    async def river_tran(self, river_list:list[str], is_emoji:bool = True) -> str:
         count = 0
         line_num = 1
         string = ""
         for t in river_list:
             count += 1
-            string += t + " "
+            if is_emoji:
+                emoji = self.text_emoji_dict[t]
+                string += f"{emoji} "
+            else:
+                string += t + " "
             if count == 6:
                 string += "\n"
                 line_num += 1
                 count = 0
         string += " \n"*(5-line_num)
         return string
+
+    async def tehai_tran(self, player:Player, is_emoji:bool = True) -> str:
+        tehai = player.tehai.copy()
+        furo = player.furo.copy()
+        string = ""
+        for t in tehai:
+            if is_emoji:
+                emoji = self.text_emoji_dict[t]
+                string += f"{emoji} "
+        string += "\n"
+        for t in furo:
+            m_type, pos =  mentsu_judge(t)
+            if pos is None: # 暗槓
+                emoji = self.text_emoji_dict[t[0][0] + t[0][1]]
+                string += f"{emoji}{emoji}{emoji}{emoji}"
+            else:
+                if m_type == "kakan":
+                    string = ""
+                    for count in range(3):
+                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                        string += f"{emoji}"
+                        if count == pos:
+                            string += "***"
+                elif m_type == "minkan":
+                    string = ""
+                    for count in range(3):
+                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                        string += f"{emoji}"
+                        if count == pos:
+                            string += "**"
+                elif m_type == "koutsu":
+                    string = ""
+                    for count in range(3):
+                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                        string += f"{emoji}"
+                        if count == pos:
+                            string += "*"
+                else:
+                    string = ""
+                    for count in range(3):
+                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                        string += f"{emoji}"
+                        if count == pos:
+                            string += "*"
+        return string 
+
+    async def pai_list_emoji_tran(self, pai_list:list[str]) -> str:
+        string = ""
+        for p in pai_list:
+            emoji = self.text_emoji_dict[p]
+            string += f"{emoji} "
+        return string 
 
