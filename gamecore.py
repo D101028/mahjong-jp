@@ -45,7 +45,12 @@ def card_plus(userinput:str, z_contained = False, mod = False):
         userinput = "5" + userinput[1:]
     if mod:
         if userinput[1] == "z":
-            output = str(((int(userinput[0])+1)-1) % 7 + 1) + userinput[1:]
+            if userinput == "7z":
+                return "5z"
+            elif userinput == "4z":
+                return "1z"
+            else:
+                output = str(((int(userinput[0])+1)-1) % 7 + 1) + userinput[1:]
         else:
             output = str(((int(userinput[0])+1)-1) % 9 + 1) + userinput[1:]
     else:
@@ -71,6 +76,7 @@ def p_next(p:str):
     return MENFON_INDEX[(MENFON_INDEX.index(p) + 1) % 4]
 
 def akadorasuu_tran(tehai:list[str])->tuple[list,int]:
+    """output: (處理後的牌面, akadora 數)"""
     tehai = tehai.copy()
     count = 0
     dora = 0
@@ -88,10 +94,11 @@ def akadorasuu_tran(tehai:list[str])->tuple[list,int]:
     return tehai, dora
 
 def mentsu_judge(mentsu:list[str]) -> tuple[str, int or None]:
-    """output: ('juntsu', None) ('koutsu', pos) ('minkan', pos) ('ankan', pos)"""
+    """output: ('ankan', None) ('juntsu', 0) ('koutsu', pos) ('minkan', pos) ('kakan', pos)"""
+    mentsu = akadorasuu_tran(mentsu)[0]
     if mentsu[0][0] != mentsu[1][0]:
         # 順子
-        return 'juntsu', None
+        return 'juntsu', 0
     pos = 0
     for i in mentsu:
         if len(i) != 2:
@@ -118,7 +125,8 @@ def pai_combin_tran(pai_combin:str):
     return " ".join(newlist)
 
 def is_mentsu_equal(mentsu1:str, mentsu2:list):
-    """123m == [1m*,2m,3m]\n 111z != [1m,1m,1m]\n 1z1z1z == [1z,1z,1z]"""
+    """123m == [1m*,2m,3m]\n 111z != [1m,1m,1m]\n 1z1z1z == [1z,1z,1z]\n 5m5m5m == [0m**,5m,5m]"""
+    mentsu2 = akadorasuu_tran(mentsu2)[0]
     if len(mentsu1) == 6:
         mentsu1 = mentsu1[0]+mentsu1[2]+mentsu1[4]+mentsu1[5]
     if mentsu1[3] == mentsu2[0][1]:
@@ -217,6 +225,8 @@ class Game():
         self.junme = 0 # 巡數
         self.rinshan = [self.yama[0]]
         del self.yama[0]
+
+        self.uradora_pointer = []
         
         # 嶺上開花巡
         self.rinshankaihou_able = False
@@ -285,15 +295,19 @@ class Game():
         chi_pai = chi_ed_player.river[-1]
         del chi_ed_player.river[-1]
         
-        furo = []
-        furo.append(chi_pai+"*")
-        for i in could_furo[chi_num]:
-            if i != chi_pai:
-                furo.append(i)
-                del chi_player.tehai[chi_player.tehai.index(i)]
-        chi_player.furo.append(furo)
+        if chi_pai[0] != "0":
+            furo = []
+            furo.append(chi_pai+"*")
+            for i in could_furo[chi_num]:
+                if i != chi_pai:
+                    furo.append(i)
+                    del chi_player.tehai[chi_player.tehai.index(i)]
+            chi_player.furo.append(furo)
+        else:
+            # furo = 
+            pass 
 
-    def pon(self, pon_player:Player, pon_ed_player:Player):
+    def pon(self, pon_player:Player, pon_ed_player:Player, is_contain_akadora:bool = False):
         # 碰牌處理
         for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
@@ -303,16 +317,48 @@ class Game():
 
         pon_pai = pon_ed_player.river[-1]
         del pon_ed_player.river[-1]
-        furo = [pon_pai, pon_pai, pon_pai]
-        if pon_ed_player.menfon == p_next(pon_player.menfon):
-            furo[2]+="*"
-        elif pon_ed_player.menfon == p_next(p_next((pon_player.menfon))):
-            furo[1]+="*"
-        elif pon_ed_player.menfon == p_next(p_next(p_next((pon_player.menfon)))):
-            furo[0]+="*"
+        if pon_pai[0] != "0":
+            if is_contain_akadora:
+                if pon_ed_player.menfon == p_next(pon_player.menfon):
+                    furo = [pon_pai, "0"+pon_pai[-1], pon_pai+"*"]
+                elif pon_ed_player.menfon == p_next(p_next((pon_player.menfon))):
+                    furo = [pon_pai, pon_pai+"*", "0"+pon_pai[-1]]
+                elif pon_ed_player.menfon == p_next(p_next(p_next((pon_player.menfon)))):
+                    furo = [pon_pai+"*", "0"+pon_pai[-1], pon_pai]
+                pon_player.tehai.remove(pon_pai)
+                pon_player.tehai.remove("0"+pon_pai[-1])
+            else:
+                if pon_player.tehai.count(pon_pai) < 2:
+                    if pon_ed_player.menfon == p_next(pon_player.menfon):
+                        furo = [pon_pai, "0"+pon_pai[-1], pon_pai+"*"]
+                    elif pon_ed_player.menfon == p_next(p_next((pon_player.menfon))):
+                        furo = [pon_pai, pon_pai+"*", "0"+pon_pai[-1]]
+                    elif pon_ed_player.menfon == p_next(p_next(p_next((pon_player.menfon)))):
+                        furo = [pon_pai+"*", "0"+pon_pai[-1], pon_pai]
+                    pon_player.tehai.remove(pon_pai)
+                    pon_player.tehai.remove("0"+pon_pai[-1])
+                else:
+                    furo = [pon_pai, pon_pai, pon_pai]
+                    if pon_ed_player.menfon == p_next(pon_player.menfon):
+                        furo[2]+="*"
+                    elif pon_ed_player.menfon == p_next(p_next((pon_player.menfon))):
+                        furo[1]+="*"
+                    elif pon_ed_player.menfon == p_next(p_next(p_next((pon_player.menfon)))):
+                        furo[0]+="*"
+                    pon_player.tehai.remove(pon_pai)
+                    pon_player.tehai.remove(pon_pai)
+        else:
+            if pon_ed_player.menfon == p_next(pon_player.menfon):
+                furo = ["5"+pon_pai[-1], "5"+pon_pai[-1], pon_pai+"*"]
+            elif pon_ed_player.menfon == p_next(p_next((pon_player.menfon))):
+                furo = ["5"+pon_pai[-1], pon_pai+"*", "5"+pon_pai[-1]]
+            elif pon_ed_player.menfon == p_next(p_next(p_next((pon_player.menfon)))):
+                furo = [pon_pai+"*", "5"+pon_pai[-1], "5"+pon_pai[-1]]
+            pon_player.tehai.remove("5"+pon_pai[-1])
+            pon_player.tehai.remove("5"+pon_pai[-1])
+
+            
         pon_player.furo.append(furo)
-        del pon_player.tehai[pon_player.tehai.index(pon_pai)]
-        del pon_player.tehai[pon_player.tehai.index(pon_pai)]
 
     def minkan(self, kan_player:Player, kan_ed_player:Player):
         # 明槓處理
@@ -324,17 +370,43 @@ class Game():
 
         kan_pai = kan_ed_player.river[-1]
         del kan_ed_player.river[-1]
-        furo = [kan_pai, kan_pai, kan_pai]
-        if kan_ed_player.menfon == p_next(kan_player.menfon):
-            furo[2]+="**"
-        elif kan_ed_player.menfon == p_next(p_next(kan_player.menfon)):
-            furo[1]+="**"
-        elif kan_ed_player.menfon == p_next(p_next(p_next(kan_player.menfon))):
-            furo[0]+="**"
-        kan_player.furo.append(furo)
-        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
-        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
-        del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+        if kan_pai[0] != "0":
+            if kan_player.tehai.count(kan_pai) < 3:
+                # furo = [kan_pai, kan_pai, kan_pai]
+                if kan_ed_player.menfon == p_next(kan_player.menfon):
+                    furo = [kan_pai, "0"+kan_pai[-1], kan_pai+"**"]
+                elif kan_ed_player.menfon == p_next(p_next(kan_player.menfon)):
+                    furo = [kan_pai, kan_pai+"**", "0"+kan_pai[-1]]
+                elif kan_ed_player.menfon == p_next(p_next(p_next(kan_player.menfon))):
+                    furo = [kan_pai+"**", kan_pai, "0"+kan_pai[-1]]
+                kan_player.furo.append(furo)
+                del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+                del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+                del kan_player.tehai[kan_player.tehai.index("0"+kan_pai[-1])]
+            else:
+                furo = [kan_pai, kan_pai, kan_pai]
+                if kan_ed_player.menfon == p_next(kan_player.menfon):
+                    furo[2]+="**"
+                elif kan_ed_player.menfon == p_next(p_next(kan_player.menfon)):
+                    furo[1]+="**"
+                elif kan_ed_player.menfon == p_next(p_next(p_next(kan_player.menfon))):
+                    furo[0]+="**"
+                kan_player.furo.append(furo)
+                del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+                del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+                del kan_player.tehai[kan_player.tehai.index(kan_pai)]
+
+        else:
+            if kan_ed_player.menfon == p_next(kan_player.menfon):
+                furo = ["5"+kan_pai[-1], "5"+kan_pai[-1], kan_pai+"**"]
+            elif kan_ed_player.menfon == p_next(p_next(kan_player.menfon)):
+                furo = ["5"+kan_pai[-1], kan_pai+"**", "5"+kan_pai[-1]]
+            elif kan_ed_player.menfon == p_next(p_next(p_next(kan_player.menfon))):
+                furo = [kan_pai+"**", "5"+kan_pai[-1], "5"+kan_pai[-1]]
+            kan_player.furo.append(furo)
+            del kan_player.tehai[kan_player.tehai.index("5"+kan_pai[-1])]
+            del kan_player.tehai[kan_player.tehai.index("5"+kan_pai[-1])]
+            del kan_player.tehai[kan_player.tehai.index("5"+kan_pai[-1])]
 
         # 嶺上開花巡
         self.rinshankaihou_able = True
@@ -349,15 +421,55 @@ class Game():
         self.junme += 1
         self.playing = player.menfon
 
-        del player.tehai[player.tehai.index(h)]
-        count = 0
-        for i in player.furo:
-            _type, pos = mentsu_judge(i)
-            if _type == "koutsu":
-                if i[0][0]+i[0][1] == h:
-                    player.furo[count][pos] = h+"***"
+        if not h[0] in ("0", "5"):
+            del player.tehai[player.tehai.index(h)]
+            count = 0
+            for i in player.furo:
+                _type, pos = mentsu_judge(i)
+                if _type == "koutsu":
+                    if i[0][0]+i[0][1] == h:
+                        player.furo[count][pos] = h+"***"
+                        break
+                count += 1
+        elif h[0] == "0":
+            player.tehai.remove(h)
+            count = 0
+            for i in player.furo:
+                _type, pos = mentsu_judge(i)
+                if is_mentsu_equal("555"+h[1], i):
+                    player.furo[count][pos] = h + "***"
                     break
-            count += 1
+                count += 1
+        elif h[0] == "5" and not h in player.tehai:
+            h = "0"+h[1]
+            player.tehai.remove(h)
+            count = 0
+            for i in player.furo:
+                _type, pos = mentsu_judge(i)
+                if is_mentsu_equal("555"+h[1], i):
+                    player.furo[count][pos] = h + "***"
+                    break
+                count += 1
+        elif h[0] == "5":
+            player.tehai.remove(h)
+            count = 0
+            for i in player.furo:
+                _type, pos = mentsu_judge(i)
+                if is_mentsu_equal("555"+h[1], i):
+                    aka_pos = None
+                    for aka_pos_temp in range(3):
+                        if i[aka_pos_temp][0] == "0":
+                            aka_pos = aka_pos_temp
+                            break
+                    if aka_pos is None:
+                        if i[0][0]+i[0][1] == h:
+                            player.furo[count][pos] = h+"***"
+                    else:
+                        if aka_pos == pos:
+                            player.furo[count][pos] = "0"+h[1]+"***"
+                        else:
+                            player.furo[count][pos] = h+"***"
+
 
         # 嶺上開花巡
         self.rinshankaihou_able = True
@@ -367,11 +479,19 @@ class Game():
         player = self.players[self.playing]
         self.junme += 1
         self.playing = player.menfon 
-        player.tehai.remove(pai)
-        player.tehai.remove(pai)
-        player.tehai.remove(pai)
-        player.tehai.remove(pai)
-        player.furo.append([pai, pai, pai])
+
+        if pai in ("5m","5p","5s") and "0"+pai[-1] in player.tehai:
+            player.tehai.remove(pai)
+            player.tehai.remove(pai)
+            player.tehai.remove(pai)
+            player.tehai.remove("0"+pai[-1])
+            player.furo.append([pai, "0"+pai[-1], pai])
+        else:
+            player.tehai.remove(pai)
+            player.tehai.remove(pai)
+            player.tehai.remove(pai)
+            player.tehai.remove(pai)
+            player.furo.append([pai, pai, pai])
 
 
         # 翻寶牌指示牌
@@ -780,12 +900,17 @@ class Game():
                     h.append([13, s.tenhou])
                 else:
                     h.append([13, s.chiihou])
-                    
+            
+            self.uradora_pointer = []
+            for i in self.rinshan:
+                self.uradora_pointer.append(self.yama[-1])
+                del self.yama[-1]
+            uradora = [card_plus(i, True, True) for i in self.uradora_pointer]
             #     寶牌 # 不是役
             if len(yaku) + len(h) != 0:
                 dora_list = [card_plus(i, True, True) for i in self.rinshan]
                 if akadorasuu != 0:
-                    h.append([akadorasuu, s.akadorasuu])
+                    h.append([akadorasuu, s.akadora])
                 dorasuu = 0
                 for d in dora_list:
                     dorasuu += normal_tehai.count(d)
@@ -795,17 +920,11 @@ class Game():
             #     裡寶牌
                 if player.is_riichi:
                     uradorasuu = 0
-                    uradora_pointer = []
-                    for i in self.rinshan:
-                        uradora_pointer.append(self.yama[-1])
-                        del self.yama[-1]
-                    uradora = [card_plus(i, True, True) for i in uradora_pointer]
                     for i in uradora:
                         if i in normal_tehai:
                             uradorasuu += 1
                     if uradorasuu != 0:
                         h.append([uradorasuu, s.uradora])
-
         # 刪除不合之組合
         del_pos_list.sort()
         del_pos_list.reverse()
@@ -1025,11 +1144,14 @@ class Game():
     def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] or None]:
         if not player.is_menchin():
             return False, None
-        if len(player.tehai) != 14:
-            print(player.tehai)
-            print("Error 02")
-            exit()
         tehai = player.tehai.copy()
+        for f in player.furo:
+            if mentsu_judge(f)[0] != "ankan":
+                return False, None
+        # if len(tehai) != 14:
+        #     print(tehai)
+        #     print("Error 02")
+        #     exit()
         del tehai[cut_num]
         riichiable = False
         agari_pai = []
@@ -1420,7 +1542,8 @@ class GameProcessTest():
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            if player.tehai.count(c) >= 2:
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
+            if tehai.count(c) >= 2:
                 players.append(player)
         return players
     
@@ -1431,7 +1554,8 @@ class GameProcessTest():
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            if player.tehai.count(c) >= 3:
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
+            if tehai.count(c) >= 3:
                 players.append(player)
         return players
     
@@ -1443,17 +1567,7 @@ class GameProcessTest():
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            tehai = player.tehai.copy()
-            # 赤寶處理
-            count = 0
-            for h in tehai:
-                if h == "0m":
-                    tehai[count] = "5m"
-                elif h == "0p":
-                    tehai[count] = "5p"
-                elif h == "0s":
-                    tehai[count] = "5s"
-                count += 1
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
             
             num = int(c[0])
             s = c[1]

@@ -31,6 +31,10 @@ class GameProcess():
         self.tempai_message_text = ""
 
         self.game = Game()
+
+        # 測試用作弊
+        # self.game.players["N"].tehai = ["5m","5m","7m","1s","2s","3s","4s","5s","6s","7s","8s","9s","1z"]
+        
         await self.refresh_tehai()
         await self.refresh_river()
         # await self.send_message()
@@ -72,8 +76,9 @@ class GameProcess():
                 # if self.game.junme == 1: # 作弊一下
                 #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
                 #     a = "4z"
-                # if self.game.junme == 1:
-                #     player.tehai = ["1z","1z","1z","1z","2z","2z","1m","2m","3m","4m","5m","6m","7m","8m"]
+                # if self.game.junme == 3:
+                    # player.tehai = ["0m","5m","5m","1s","2s","3s","4s","5s","6s","7s","8s","9s","1z","5m"]
+                    # player.tehai[-1] = "0m"
                 await self.refresh_tehai()
                 # await self.send_message(player.tehai, player.furo)
                 # if not player.is_riichi:
@@ -85,6 +90,8 @@ class GameProcess():
                     await self.send_message("you can tsumo!", end="")
                     if "tsumo" in await self.get_input(">>>"):
                         await self.send_message("tsumo nia!!")
+                        if player.is_riichi:
+                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer), is_code_mode=False)
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
@@ -97,13 +104,15 @@ class GameProcess():
                 furo_koutsu = [] # ex.["2m", "1z"]
                 for h in player.furo:
                     if mentsu_judge(h)[0] == "koutsu":
+                        h = akadorasuu_tran(h)[0]
                         furo_koutsu.append(h[0][0]+h[0][1])
                 
                 # 槓
                 if is_to_draw: # 吃、碰完不能加槓
                     # 加槓
+                    tehai_no_aka = akadorasuu_tran(player.tehai.copy())[0]
                     for h in furo_koutsu:
-                        if h in player.tehai: # 測試用
+                        if h in tehai_no_aka: # 測試用
                             await self.send_message("you can kakan", h, end=" ")
                             userinput = await self.get_input(">>>")
                             if userinput == "kakan" or userinput == "kan":
@@ -114,8 +123,8 @@ class GameProcess():
                                 await self.chyankan_check(h)
                     # 暗槓
                     ankan_able_pai = []
-                    tehai_temp = player.tehai.copy()
-                    for h in player.tehai:
+                    tehai_temp = akadorasuu_tran(player.tehai.copy())[0]
+                    for h in tehai_no_aka:
                         if tehai_temp.count(h) == 4:
                             ankan_able_pai.append(h)
                             tehai_temp.remove(h)
@@ -148,14 +157,14 @@ class GameProcess():
                             player.doujun_furiten = True
                         else:
                             player.doujun_furiten = False
+                    msg = ""
                     if is_tenpai:
-                        msg = ""
                         if player.furiten or player.doujun_furiten:
                             msg = "Tenpai!"+" "+str(tenpais)+" "+"furiten"
                         else:
                             msg = "Tenpai!"+" "+str(tenpais)
-                        if self.tempai_message_text != msg:
-                                self.tempai_message_text = msg
+                    if self.tempai_message_text != msg:
+                        self.tempai_message_text = msg
                         await self.refresh_tehai()
 
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
@@ -188,14 +197,14 @@ class GameProcess():
                             player.doujun_furiten = True
                         else:
                             player.doujun_furiten = False
+                    msg = ""
                     if is_tenpai:
-                        msg = ""
                         if player.furiten or player.doujun_furiten:
                             msg = "Tenpai!"+" "+str(tenpais)+" "+"furiten"
                         else:
                             msg = "Tenpai!"+" "+str(tenpais)
-                        if self.tempai_message_text != msg:
-                                self.tempai_message_text = msg
+                    if self.tempai_message_text != msg:
+                        self.tempai_message_text = msg
                         await self.refresh_tehai()
 
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
@@ -217,6 +226,15 @@ class GameProcess():
                     pass 
                 else:
                     self.game.draw()
+
+                # 測試用作弊
+                # if self.game.playing == "E" and self.game.junme == 1:
+                #     player = self.game.players[self.game.playing]
+                #     player.tehai[-1] = "5m"
+                # elif self.game.playing == "W" and self.game.junme == 5:
+                #     player = self.game.players[self.game.playing]
+                #     player.tehai[-1] = "7m"
+
                 cutting = self.game.cut(0)
                 # await self.refresh_tehai()
                 await self.refresh_river()
@@ -251,11 +269,11 @@ class GameProcess():
                 else:
                     await self.send_message("No ten")
     
-    async def send_message(self, *values, end = None) -> discord.Message:
-        string = "```\n"
+    async def send_message(self, *values, end = None, is_code_mode:bool = True) -> discord.Message:
+        string = "```\n" if is_code_mode else ""
         for value in values:
             string += str(value) + " "
-        string += "\n```"
+        string += "\n```" if is_code_mode else ""
         msg = await self.ctx.send(string)
         return msg
 
@@ -345,6 +363,8 @@ class GameProcess():
                     userinput = await self.get_input(">>>")
                     if userinput == "ron":
                         await self.send_message("ron nia!")
+                        if player.is_riichi:
+                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer), is_code_mode = False)
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
@@ -377,11 +397,30 @@ class GameProcess():
                 if player.menfon == "N": # 測試用
                     msg = await self.send_message("you can pon")
                     userinput = await self.get_input(">>>")
+                    await msg.delete()
                     if userinput == "pon":
-                        self.game.pon(pon_player = player, pon_ed_player = playing_player)
+                        pon_player = player 
+                        pon_ed_player = playing_player
+                        pon_pai = pon_ed_player.river[-1]
+
+                        is_able_choose_akadora = False
+                        if pon_pai in ("5m","5p","5s"):
+                            if "0" + pon_pai[-1] in pon_player.tehai and player.tehai.count("5"+pon_pai[-1])>=2:
+                                is_able_choose_akadora = True
+                        
+                        if is_able_choose_akadora:
+                            pai_type = pon_pai[-1]
+                            msg01 = await self.send_message(f"1. ['5{pai_type}', '5{pai_type}', '5{pai_type}']\n2. ['0{pai_type}', '5{pai_type}', '5{pai_type}']")
+                            num = await self.get_input()
+                            await msg01.delete()
+                            if num == "2": # 含赤寶
+                                self.game.pon(pon_player = pon_player, pon_ed_player = pon_ed_player, is_contain_akadora=True)
+                            else:
+                                self.game.pon(pon_player = pon_player, pon_ed_player = pon_ed_player)
+                        else:
+                            self.game.pon(pon_player = pon_player, pon_ed_player = pon_ed_player)
                         await self.send_message("pon nia!")
                         is_chi_pon = True
-                    await msg.delete()
         
         # 明槓
         players = await self.kan_able(c)
@@ -392,12 +431,12 @@ class GameProcess():
                 if player.menfon == "N": # 測試用
                     msg = await self.send_message("you can kan")
                     userinput = await self.get_input(">>>")
+                    await msg.delete()
                     if userinput == "kan":
                         self.game.minkan(kan_player = player, kan_ed_player = playing_player)
                         await self.send_message("kan nia!")
                         await self.chyankan_check(c)
                         is_minkan = True
-                    await msg.delete()
         
         # 吃
         players = await self.chi_able(c)
@@ -407,6 +446,7 @@ class GameProcess():
                 if next_player.menfon == "N": # 測試用
                     msg = await self.send_message("you can chi")
                     userinput = await self.get_input(">>>")
+                    await msg.delete()
                     if userinput == "chi":
                         chi_ed_player = playing_player
                         chi_player = next_player
@@ -436,7 +476,6 @@ class GameProcess():
                         self.game.chi(chi_player = next_player, chi_ed_player = playing_player, could_furo = could_furo, chi_num = chi_num)
                         await self.send_message("chi nia!")
                         is_chi_pon = True
-                    await msg.delete()
         return is_chi_pon, is_minkan
     
     async def ron_able(self, c:str) -> list[Player]:
@@ -452,27 +491,35 @@ class GameProcess():
         return players
     
     async def pon_able(self, c:str) -> list[Player]:
+        if c[0] == "0":
+            c = "5" + c[-1]
         players = []
         for p in MENFON_INDEX:
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            if player.tehai.count(c) >= 2:
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
+            if tehai.count(c) >= 2:
                 players.append(player)
         return players
     
     async def kan_able(self, c:str) -> list[Player]:
         # 明槓
+        if c[0] == "0":
+            c = "5" + c[-1]
         players = []
         for p in MENFON_INDEX:
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            if player.tehai.count(c) >= 3:
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
+            if tehai.count(c) >= 3:
                 players.append(player)
         return players
     
     async def chi_able(self, c:str) -> list[Player]:
+        if c[0] == "0":
+            c = "5" + c[-1]
         players = []
         if c[1] == "z":
             return []
@@ -480,17 +527,7 @@ class GameProcess():
             player = self.game.players[p]
             if p == self.game.playing or player.is_riichi:
                 continue
-            tehai = player.tehai.copy()
-            # 赤寶處理
-            count = 0
-            for h in tehai:
-                if h == "0m":
-                    tehai[count] = "5m"
-                elif h == "0p":
-                    tehai[count] = "5p"
-                elif h == "0s":
-                    tehai[count] = "5s"
-                count += 1
+            tehai = akadorasuu_tran(player.tehai.copy())[0]
             
             num = int(c[0])
             s = c[1]
@@ -505,7 +542,7 @@ class GameProcess():
         playing_msg = {
             "E":"", "S":"", "W":"", "N":""
         }
-        playing_msg[self.game.playing] = " **"
+        playing_msg[self.game.playing] = " \**"
         river_msg = "------------------------\n"
         # river_msg = "```"
         river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.rinshan) + "\n\n"
@@ -558,42 +595,39 @@ class GameProcess():
         string += "\n"
         for t in furo:
             m_type, pos =  mentsu_judge(t)
-            if pos is None: # 暗槓
-                emoji = self.text_emoji_dict[t[0][0] + t[0][1]]
-                string += f"{emoji}{emoji}{emoji}{emoji}."
+            if m_type == "ankan": # 暗槓
+                for count in range(4):
+                    emoji = self.text_emoji_dict[t[count%3]]
+                    string += f"{emoji}"
+                string += "."
+            elif m_type == "kakan":
+                for count in range(3):
+                    emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                    string += f"{emoji}"
+                    if count == pos:
+                        string += "\***"
+                string += "."
+            elif m_type == "minkan":
+                for count in range(3):
+                    emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                    string += f"{emoji}"
+                    if count == pos:
+                        string += "\**"
+                string += "."
+            elif m_type == "koutsu":
+                for count in range(3):
+                    emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                    string += f"{emoji}"
+                    if count == pos:
+                        string += "\*"
+                string += "."
             else:
-                if m_type == "kakan":
-                    string = ""
-                    for count in range(3):
-                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
-                        string += f"{emoji}"
-                        if count == pos:
-                            string += "***"
-                    string += "."
-                elif m_type == "minkan":
-                    string = ""
-                    for count in range(3):
-                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
-                        string += f"{emoji}"
-                        if count == pos:
-                            string += "**"
-                    string += "."
-                elif m_type == "koutsu":
-                    string = ""
-                    for count in range(3):
-                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
-                        string += f"{emoji}"
-                        if count == pos:
-                            string += "*"
-                    string += "."
-                else:
-                    string = ""
-                    for count in range(3):
-                        emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
-                        string += f"{emoji}"
-                        if count == pos:
-                            string += "*"
-                    string += "."
+                for count in range(3):
+                    emoji = self.text_emoji_dict[t[count][0] + t[count][1]]
+                    string += f"{emoji}"
+                    if count == pos:
+                        string += "\*"
+                string += "."
         return string 
 
     async def pai_list_emoji_tran(self, pai_list:list[str]) -> str:
