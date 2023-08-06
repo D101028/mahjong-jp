@@ -38,6 +38,11 @@ game_illustration_embed = discord.Embed(
     description = """
 還在測試版本。
 點擊 Join 開始遊戲。
+
+## 遊戲簡介
+規則同日麻，測試版時期為單人座北風，暫無流局滿貫。
+吃碰槓牌以 \* 代替旋轉90度，
+\* 表吃、碰；\** 表大明槓；\***表加槓；皆無則表暗槓。
 """)
 
 def get_emoji(ctx:commands.Context, name):
