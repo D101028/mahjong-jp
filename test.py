@@ -1,33 +1,48 @@
-import discord 
-from discord.ext import commands
+upper = 3
+class Test():
+    def __init__(self):
+        pass 
+    def func(self):
+        print("origin")
+finalclass = Test
 
-class Test(commands.Cog):
-    def __init__(self, bot):
-        self.interaction = None
+for i in range(upper):
+    if i == 0:
+        class TempClass(finalclass):
+            def __init__(self):
+                super().__init__()
+            def func0(self):
+                print("0")
+        finalclass = TempClass
+    elif i == 1:
+        class TempClass(finalclass):
+            def __init__(self):
+                super().__init__()
+            def func1(self):
+                print("1")
+        finalclass = TempClass
+    elif i == 2:
+        class TempClass(finalclass):
+            def __init__(self):
+                super().__init__()
+            def func2(self):
+                print("2")
+        finalclass = TempClass
+    elif i == 3:
+        class TempClass(finalclass):
+            def __init__(self):
+                super().__init__()
+            def func3(self):
+                print("3")
+        finalclass = TempClass
+    elif i == 4:
+        class TempClass(finalclass):
+            def __init__(self):
+                super().__init__()
+            def func4(self):
+                print("4")
+        finalclass = TempClass
 
-    @commands.command()
-    async def example(self, ctx:commands.Context):
-        await ctx.send("hay", view=TestResponseView(self))
+# finalclass().func4()
 
 
-class TestResponseView(discord.ui.View):
-    def __init__(self, main_class: Test):
-        super().__init__()
-        self.main_class = main_class
-
-    @discord.ui.button(label="click", style = discord.ButtonStyle.blurple)
-    async def click(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.main_class.interaction is None:
-            await interaction.response.send_message(
-                content="Hello Mom.", 
-                view=TestResponseView(self.main_class), 
-                ephemeral=True)
-            self.main_class.interaction = interaction
-        else:
-            await self.main_class.interaction.edit_original_response(content="editted")
-            await interaction.response.defer()
-
-
-
-async def setup(bot):
-    await bot.add_cog(Test(bot))

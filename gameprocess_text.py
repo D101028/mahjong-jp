@@ -33,7 +33,7 @@ class GameProcess():
         self.game = Game()
 
         # 測試用作弊
-        # self.game.players["N"].tehai = ["5m","5m","7m","1s","2s","3s","4s","5s","6s","7s","8s","9s","1z"]
+        # self.game.players["N"].tehai = ["3m","4m","4m","5m","5m","6m","6m","7m","1z","1z","1z","2z","2z"]
         
         await self.refresh_tehai()
         await self.refresh_river()
@@ -85,7 +85,7 @@ class GameProcess():
                 #     await self.send_message("  1     2     3     4     5     6     7     8     9     10    11    12    13    14")
                 
                 # 自摸
-                is_agari = (self.game.hansuu(player, "tsumo") != 0)
+                is_agari = (self.game.hansuu(player, "tsumo") != 0) and is_to_draw
                 if is_agari:
                     await self.send_message("you can tsumo!", end="")
                     if "tsumo" in await self.get_input(">>>"):
@@ -148,15 +148,17 @@ class GameProcess():
                     await self.refresh_river()
                     player.is_ippatsu_junme = False
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
-                    for tenpai in tenpais: # 振聽確認
+                    # 振聽確認
+                    player.furiten = False
+                    player.doujun_furiten = False
+                    for tenpai in tenpais: 
                         if tenpai in player.furiten_pai: # 捨牌、立直振聽
                             player.furiten = True
-                        else:
-                            player.furiten = False
+                            break
+                    for tenpai in tenpais:
                         if tenpai in player.doujun_furiten_pai: # 同巡振聽
                             player.doujun_furiten = True
-                        else:
-                            player.doujun_furiten = False
+                            break
                     msg = ""
                     if is_tenpai:
                         if player.furiten or player.doujun_furiten:
@@ -188,15 +190,17 @@ class GameProcess():
                     await self.refresh_tehai()
                     await self.refresh_river()
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
-                    for tenpai in tenpais: # 振聽確認
+                    # 振聽確認
+                    player.furiten = False
+                    player.doujun_furiten = False
+                    for tenpai in tenpais: 
                         if tenpai in player.furiten_pai: # 捨牌、立直振聽
                             player.furiten = True
-                        else:
-                            player.furiten = False
+                            break
+                    for tenpai in tenpais:
                         if tenpai in player.doujun_furiten_pai: # 同巡振聽
                             player.doujun_furiten = True
-                        else:
-                            player.doujun_furiten = False
+                            break
                     msg = ""
                     if is_tenpai:
                         if player.furiten or player.doujun_furiten:
@@ -220,7 +224,6 @@ class GameProcess():
                         self.game.rinshankaihou_able = False
                 # print(player.is_menchin(), player.tehai, player.furo)
 
-
             else: # 電腦出牌(自動摸切)
                 if not is_to_draw:
                     pass 
@@ -228,12 +231,12 @@ class GameProcess():
                     self.game.draw()
 
                 # 測試用作弊
-                # if self.game.playing == "E" and self.game.junme == 1:
+                # if self.game.playing == "W" and self.game.junme == 1:
                 #     player = self.game.players[self.game.playing]
-                #     player.tehai[-1] = "5m"
-                # elif self.game.playing == "W" and self.game.junme == 5:
+                #     player.tehai[-1] = "0m"
+                # elif self.game.playing == "E" and self.game.junme == 3:
                 #     player = self.game.players[self.game.playing]
-                #     player.tehai[-1] = "7m"
+                #     player.tehai[-1] = "2z"
 
                 cutting = self.game.cut(0)
                 # await self.refresh_tehai()
@@ -318,7 +321,7 @@ class GameProcess():
                             self.is_finished = True
                         else:
                             if player.is_riichi: # 立直振聽
-                                player.furiten_pai.append(kan_pai)
+                                player.furiten_pai.append(akadora_str_tran(kan_pai))
                                 player.furiten = True
         return 
 
@@ -347,7 +350,7 @@ class GameProcess():
                         self.is_finished = True
                     else:
                         if player.is_riichi: # 立直振聽
-                            player.furiten_pai.append(kan_pai)
+                            player.furiten_pai.append(akadora_str_tran(kan_pai))
                             player.furiten = True
 
     async def check(self, c:str) -> bool:
@@ -374,7 +377,7 @@ class GameProcess():
                         return is_chi_pon, is_minkan
                     else:
                         if player.is_riichi: # 立直振聽
-                            player.furiten_pai.append(c)
+                            player.furiten_pai.append(akadora_str_tran(c))
                             player.furiten = True
 
         # 同巡振聽
@@ -435,7 +438,6 @@ class GameProcess():
                     if userinput == "kan":
                         self.game.minkan(kan_player = player, kan_ed_player = playing_player)
                         await self.send_message("kan nia!")
-                        await self.chyankan_check(c)
                         is_minkan = True
         
         # 吃
@@ -451,18 +453,79 @@ class GameProcess():
                         chi_ed_player = playing_player
                         chi_player = next_player
 
+                        akadora_nashi_tehai = akadorasuu_tran(chi_player.tehai.copy())[0]
                         chi_pai = chi_ed_player.river[-1]
                         could_furo = []
                         minus1 = card_minus(chi_pai)
                         minus2 = card_minus(minus1)
                         plus1 = card_plus(chi_pai)
                         plus2 = card_plus(plus1)
-                        if plus1 in chi_player.tehai and plus2 in chi_player.tehai:
-                            could_furo.append([chi_pai, plus1, plus2])
-                        if minus1 in chi_player.tehai and plus1 in chi_player.tehai:
-                            could_furo.append([minus1, chi_pai, plus1])
-                        if minus2 in chi_player.tehai and minus1 in chi_player.tehai:
-                            could_furo.append([minus2, minus1, chi_pai])
+                        if plus1 in akadora_nashi_tehai and plus2 in akadora_nashi_tehai:
+                            if plus1 in ("5m","5p","5s"):
+                                if "0"+plus1[1] in chi_player.tehai: # 手上有可組合紅寶
+                                    if plus1 in chi_player.tehai: # 手上也有非紅寶
+                                        could_furo.append([chi_pai, plus1, plus2])
+                                        could_furo.append([chi_pai, "0"+plus1[1], plus2])
+                                    else: # 手上沒有非紅寶
+                                        could_furo.append([chi_pai, "0"+plus1[1], plus2])
+                                else: # 手上沒有可組合紅寶
+                                    could_furo.append([chi_pai, plus1, plus2])
+                            elif plus2 in ("5m","5p","5s"):
+                                if "0"+plus2[1] in chi_player.tehai:
+                                    if plus2 in chi_player.tehai:
+                                        could_furo.append([chi_pai, plus1, plus2])
+                                        could_furo.append([chi_pai, plus1, "0"+plus2[1]])
+                                    else:
+                                        could_furo.append([chi_pai, plus1, "0"+plus2[1]])
+                                else:
+                                    could_furo.append([chi_pai, plus1, plus2])
+                            else:
+                                could_furo.append([chi_pai, plus1, plus2])
+
+                        if minus1 in akadora_nashi_tehai and plus1 in akadora_nashi_tehai:
+                            if minus1 in ("5m","5p","5s"):
+                                if "0"+minus1[1] in chi_player.tehai: # 手上有可組合紅寶
+                                    if minus1 in chi_player.tehai: # 手上也有非紅寶
+                                        could_furo.append([minus1, chi_pai, plus1])
+                                        could_furo.append(["0"+minus1[1], chi_pai, plus1])
+                                    else: # 手上沒有非紅寶
+                                        could_furo.append(["0"+minus1[1], chi_pai, plus1])
+                                else: # 手上沒有可組合紅寶
+                                    could_furo.append([minus1, chi_pai, plus1])
+                            elif plus1 in ("5m","5p","5s"):
+                                if "0"+plus1[1] in chi_player.tehai: # 手上有可組合紅寶
+                                    if plus1 in chi_player.tehai: # 手上也有非紅寶
+                                        could_furo.append([minus1, chi_pai, plus1])
+                                        could_furo.append([minus1, chi_pai, "0"+plus1[1]])
+                                    else: # 手上沒有非紅寶
+                                        could_furo.append([minus1, chi_pai, "0"+plus1[1]])
+                                else: # 手上沒有可組合紅寶
+                                    could_furo.append([minus1, chi_pai, plus1])
+                            else:
+                                could_furo.append([minus1, chi_pai, plus1])
+                        
+                        if minus2 in akadora_nashi_tehai and minus1 in akadora_nashi_tehai:
+                            if minus2 in ("5m","5p","5s"):
+                                if "0"+minus2[1] in chi_player.tehai: # 手上有可組合紅寶
+                                    if minus2 in chi_player.tehai: # 手上也有非紅寶
+                                        could_furo.append([minus2, minus1, chi_pai])
+                                        could_furo.append(["0"+minus2[1], minus1, chi_pai])
+                                    else: # 手上沒有非紅寶
+                                        could_furo.append(["0"+minus2[1], minus1, chi_pai])
+                                else: # 手上沒有可組合紅寶
+                                    could_furo.append([minus2, minus1, chi_pai])
+                            elif minus1 in ("5m","5p","5s"):
+                                if "0"+minus1[1] in chi_player.tehai: # 手上有可組合紅寶
+                                    if minus1 in chi_player.tehai: # 手上也有非紅寶
+                                        could_furo.append([minus2, minus1, chi_pai])
+                                        could_furo.append([minus2, "0"+minus1[1], chi_pai])
+                                    else: # 手上沒有非紅寶
+                                        could_furo.append([minus2, "0"+minus1[1], chi_pai])
+                                else: # 手上沒有可組合紅寶
+                                    could_furo.append([minus2, minus1, chi_pai])
+                            else:
+                                could_furo.append([minus2, minus1, chi_pai])
+
                         chi_num = 0
                         if chi_player.menfon == "N": # 測試用
                             if len(could_furo) > 1:

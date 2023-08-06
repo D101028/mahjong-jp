@@ -3,7 +3,7 @@ import random
 from ext.support import INDEX
 index = INDEX[2].copy()
 MENFON_INDEX = ["E","S","W","N"]
-import support 
+import mastersupport 
 from lang import tc
 s = tc
 # def shuffle():
@@ -148,6 +148,12 @@ def round_up(num:int, n:int = 2):
     else:
         return (num//10**n+1)*10**n
 
+def akadora_str_tran(pai:str) -> str:
+    if pai[0] == "0":
+        return "5"+pai[1]
+    else:
+        return pai
+
 class Player():
     def __init__(self, menfon:str, tehai:list, ):
         """menfon: 風\ntehai: 手牌 -> ["1m", "2m", ...]"""
@@ -272,10 +278,7 @@ class Game():
         del player.tehai[num-1]
         player.tehai = self.sort(player.tehai)
         player.river.append(cutting)
-        if cutting[0] == "0":
-            player.furiten_pai.append("5"+cutting[1:])
-        else:
-            player.furiten_pai.append(cutting)
+        player.furiten_pai.append(akadora_str_tran(cutting))
 
         # 解除同巡振聽
         player.doujun_furiten_pai = []
@@ -284,7 +287,7 @@ class Game():
         return cutting
 
 
-    def chi(self, chi_player:Player, chi_ed_player:Player, could_furo:list, chi_num:int):
+    def chi(self, chi_player:Player, chi_ed_player:Player, could_furo:list[list], chi_num:int):
         # 吃牌處理
         for m, p in self.players.items():# 斷一發
             if m != self.playing and p.is_ippatsu_junme:
@@ -294,18 +297,18 @@ class Game():
 
         chi_pai = chi_ed_player.river[-1]
         del chi_ed_player.river[-1]
+        choosed_furo = could_furo[chi_num]
+
+        furo = []
+        furo.append(chi_pai+"*")
+        choosed_furo.remove(chi_pai)
+        furo += choosed_furo
+        for h in choosed_furo:
+            chi_player.tehai.remove(h)
+
+        chi_player.furo.append(furo)
         
-        if chi_pai[0] != "0":
-            furo = []
-            furo.append(chi_pai+"*")
-            for i in could_furo[chi_num]:
-                if i != chi_pai:
-                    furo.append(i)
-                    del chi_player.tehai[chi_player.tehai.index(i)]
-            chi_player.furo.append(furo)
-        else:
-            # furo = 
-            pass 
+
 
     def pon(self, pon_player:Player, pon_ed_player:Player, is_contain_akadora:bool = False):
         # 碰牌處理
@@ -416,7 +419,7 @@ class Game():
         player = self.players[self.playing]
 
         for m, p in self.players.items():# 斷一發
-            if m != self.playing and p.is_ippatsu_junme:
+            if m != self.playing and p.is_ippatsu_junme and (not akadora_str_tran(h) in p.tenpais):
                 p.is_ippatsu_junme = False
         self.junme += 1
         self.playing = player.menfon
@@ -655,7 +658,7 @@ class Game():
             yaku.append([1,s.rinshankaihou])
 
         # support.py 計算之役
-        result = support.main(tehai=input_tehai, has_koyaku=False)
+        result = mastersupport.main(tehai=input_tehai, has_koyaku=False)
         hansuu_yaku_list = result[2]
         pai_combin_list = result[3]
         temp = []

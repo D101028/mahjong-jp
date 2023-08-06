@@ -3,6 +3,7 @@ from discord.ext import commands
 import json
 import os
 import gameprocess_text
+import gameprocess
 import shutil
 with open("./setting.json", mode = "rb") as file:
     data = file.read()
@@ -20,8 +21,8 @@ bot = commands.Bot(command_prefix="%", intents = intents)
 
 @bot.event
 async def on_ready():
-    await bot.load_extension("game")
-    # await bot.load_extension("test")
+    # await bot.load_extension("game")
+    await bot.load_extension("test_cog")
     print(">> Bot is online <<")
 
 @bot.command()
@@ -36,6 +37,10 @@ async def ping(ctx:commands.Context):
 @bot.command()
 async def mjtest(ctx:commands.Context):
     await gameprocess_text.create_process(bot = bot, ctx = ctx)
+
+@bot.command()
+async def mahjong(ctx:commands.Context):
+    await gameprocess.create_process(bot = bot, ctx = ctx)
 
 if __name__=="__main__":
     bot.run(token)
