@@ -2,7 +2,7 @@ from gamecore import *
 import discord
 from discord.ext import commands
 import asyncio
-from ext.support import get_emoji, INDEX
+from ext.support import get_emoji, INDEX, game_illustration_embed
 
 async def create_process(bot:commands.Bot, ctx:commands.Context):
     process = GameProcess(bot = bot, ctx = ctx)
@@ -304,9 +304,11 @@ class GameProcess():
         self.check_msg = await self.ctx.send("Ignore this message.")
 
         self.tehai_message = discord.Interaction
-        self.river_message = await self.ctx.send("River Message", view=JoinView(self))
+        illustrate_msg = await self.ctx.send(embed=game_illustration_embed)
+        self.river_message = await self.ctx.send(content=" ", view=JoinView(self))
         await wait_for_bot_reaction_add(self.bot)
-        self.river_message = await self.ctx.send("River Message", view = None)
+        # await illustrate_msg.delete()
+        await self.river_message.edit(content="River Message", view = None)
         # self.tehai_message = await self.ctx.send("Tehai Message")
         self.tempai_message_text = ""
 

@@ -33,6 +33,13 @@ INDEX = [
      "0m", "0s", "0p"]
 ]
 
+game_illustration_embed = discord.Embed(
+    title = "麻將測試 0.1", 
+    description = """
+還在測試版本。
+點擊 Join 開始遊戲。
+""")
+
 def get_emoji(ctx:commands.Context, name):
     for emoji in ctx.guild.emojis:
         if emoji.name == name:
