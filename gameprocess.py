@@ -316,7 +316,7 @@ class GameProcess():
         self.game = Game()
 
         # 測試用作弊
-        self.game.players["N"].tehai = ["3m","4m","4m","5m","0m","6m","6m","7m","1z","1z","1z","2z","2z"]
+        # self.game.players["N"].tehai = ["3m","4m","4m","5m","0m","6m","6m","7m","1z","1z","1z","2z","2z"]
         
         await self.refresh_tehai()
         await self.refresh_river()
@@ -588,10 +588,10 @@ class GameProcess():
                     self.game.draw()
 
                 # 測試用作弊
-                if self.game.playing == "W" and self.game.junme == 1:
-                    player = self.game.players[self.game.playing]
-                    player.tehai[-1] = "4m"
-                    # a = "1z"
+                # if self.game.playing == "W" and self.game.junme == 1:
+                #     player = self.game.players[self.game.playing]
+                #     player.tehai[-1] = "4m"
+                #     a = "1z"
                 # elif self.game.playing == "E" and self.game.junme == 3:
                 #     player = self.game.players[self.game.playing]
                 #     player.tehai[-1] = "2z"
