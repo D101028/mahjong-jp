@@ -304,6 +304,7 @@ class GameProcess():
         self.check_msg = await self.ctx.send("Ignore this message.")
 
         self.tehai_message = discord.Interaction
+        self.tehai_extra_message = ""
         illustrate_msg = await self.ctx.send(embed=game_illustration_embed)
         self.river_message = await self.ctx.send(content=" ", view=JoinView(self))
         await wait_for_bot_reaction_add(self.bot)
@@ -315,7 +316,7 @@ class GameProcess():
         self.game = Game()
 
         # 測試用作弊
-        # self.game.players["N"].tehai = ["1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z","5z"]
+        self.game.players["N"].tehai = ["3m","4m","4m","5m","0m","6m","6m","7m","1z","1z","1z","2z","2z"]
         
         await self.refresh_tehai()
         await self.refresh_river()
@@ -376,7 +377,7 @@ class GameProcess():
                         ["自摸", "tsumo", discord.ButtonStyle.danger], 
                         ["跳過", "", discord.ButtonStyle.gray]
                     ]
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     # await self.send_message("you can tsumo!", end="")
@@ -412,7 +413,7 @@ class GameProcess():
                                 ["槓", "kan", discord.ButtonStyle.green], 
                                 ["跳過", "", discord.ButtonStyle.gray]
                             ]
-                            w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                            w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                             userinput = await w.create_btn_and_wait(True)
 
                             if userinput == "kakan" or userinput == "kan":
@@ -436,7 +437,7 @@ class GameProcess():
                             ["槓", "kan", discord.ButtonStyle.green], 
                             ["跳過", "", discord.ButtonStyle.gray]
                         ]
-                        w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                        w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                         userinput = await w.create_btn_and_wait(True)
 
                         # await self.send_message("you can ankan", pai, end=" ")
@@ -490,7 +491,7 @@ class GameProcess():
                         btns.append(["立直", "riichi", discord.ButtonStyle.danger])
 
 
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     # userinput = await self.get_input("切牌>>>")
@@ -505,7 +506,7 @@ class GameProcess():
                             btns.append(b)
                         btns.append(["取消", "cancel", discord.ButtonStyle.grey])
 
-                        w_temp = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                        w_temp = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                         userinput_temp = await w_temp.create_btn_and_wait(True)
                         if userinput_temp == "cancel":
                             btns = []
@@ -515,7 +516,7 @@ class GameProcess():
                                 b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
                                 btns.append(b)
 
-                            w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                            w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                             userinput = await w2.create_btn_and_wait(True)
                         else:
                             riichiable, agari_pai = self.game.check_riichi(player, int(userinput_temp) - 1)
@@ -536,7 +537,7 @@ class GameProcess():
                                     b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
                                     btns.append(b)
 
-                                w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                                w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                                 userinput = await w2.create_btn_and_wait(True)
                     try:
                         int(userinput)
@@ -587,10 +588,10 @@ class GameProcess():
                     self.game.draw()
 
                 # 測試用作弊
-                # if self.game.playing == "W" and self.game.junme == 1:
-                #     player = self.game.players[self.game.playing]
-                #     player.tehai[-1] = "1z"
-                #     a = "1z"
+                if self.game.playing == "W" and self.game.junme == 1:
+                    player = self.game.players[self.game.playing]
+                    player.tehai[-1] = "4m"
+                    # a = "1z"
                 # elif self.game.playing == "E" and self.game.junme == 3:
                 #     player = self.game.players[self.game.playing]
                 #     player.tehai[-1] = "2z"
@@ -620,14 +621,15 @@ class GameProcess():
 
         # 流局滿貫 # 不計寶牌
         
-
+        string = ""
         if not self.is_finished:
             for m in MENFON_INDEX: # 荒牌流局
-                await self.send_message(m + ": ")
+                string += m + ": "
                 if self.game.players[m].is_tenpai:
-                    await self.send_message("Tenpai:", player.tenpais)
+                    string += "Tenpai:"+str(player.tenpais) + "\n"
                 else:
-                    await self.send_message("No ten")
+                    string += "No ten" + "\n"
+        await self.send_message(string)
     
     async def send_message(self, *values, end = None, is_code_mode:bool = True) -> discord.Message:
         string = "```\n" if is_code_mode else ""
@@ -666,8 +668,16 @@ class GameProcess():
                             return 
                     # 國士搶槓成功
                     if player.menfon == "N": # 測試用
-                        await self.send_message("you can ron !")
-                        userinput = await self.get_input(">>>")
+
+                        btns = [
+                            ["榮和", "ron", discord.ButtonStyle.danger], 
+                            ["跳過", "cancel", discord.ButtonStyle.grey]
+                        ]
+                        w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
+                        userinput = await w.create_btn_and_wait(True)
+
+                        # await self.send_message("you can ron !")
+                        # userinput = await self.get_input(">>>")
                         if userinput == "ron":
                             await self.send_message("ron nia!")
                             hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_open_uradora=True, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
@@ -695,6 +705,15 @@ class GameProcess():
             tehai.append(kan_pai)
             if self.game.is_agari(tehai):
                 if player.menfon == "N": # 測試用
+                    
+                    
+                    btns = [
+                        ["榮和", "ron", discord.ButtonStyle.danger], 
+                        ["跳過", "cancel", discord.ButtonStyle.grey]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
                     await self.send_message("you can ron !")
                     userinput = await self.get_input(">>>")
                     if userinput == "ron":
@@ -725,7 +744,7 @@ class GameProcess():
                         ["榮和", "ron", discord.ButtonStyle.danger], 
                         ["跳過", "", discord.ButtonStyle.gray]
                     ]
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     if userinput == "ron":
@@ -766,7 +785,7 @@ class GameProcess():
                         ["碰", "pon", discord.ButtonStyle.green], 
                         ["跳過", "", discord.ButtonStyle.gray]
                     ]
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     # msg = await self.send_message("you can pon")
@@ -784,9 +803,22 @@ class GameProcess():
                         
                         if is_able_choose_akadora:
                             pai_type = pon_pai[-1]
-                            msg01 = await self.send_message(f"1. ['5{pai_type}', '5{pai_type}', '5{pai_type}']\n2. ['0{pai_type}', '5{pai_type}', '5{pai_type}']")
-                            num = await self.get_input()
-                            await msg01.delete()
+                            self.tehai_extra_message = f"1. ['5{pai_type}', '5{pai_type}', '5{pai_type}']\n2. ['0{pai_type}', '5{pai_type}', '5{pai_type}']"
+
+                            btns0 = [
+                                ["1", "1", discord.ButtonStyle.blurple], 
+                                ["2", "2", discord.ButtonStyle.blurple]
+                            ]
+                            w0 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns0, self.check_msg)
+                            await self.refresh_tehai()
+                            num = await w0.create_btn_and_wait(True)
+                            self.tehai_extra_message = ""
+                            await self.refresh_tehai()
+
+
+                            # msg01 = await self.send_message(f"1. ['5{pai_type}', '5{pai_type}', '5{pai_type}']\n2. ['0{pai_type}', '5{pai_type}', '5{pai_type}']")
+                            # num = await self.get_input()
+                            # await msg01.delete()
                             if num == "2": # 含赤寶
                                 self.game.pon(pon_player = pon_player, pon_ed_player = pon_ed_player, is_contain_akadora=True)
                             else:
@@ -807,7 +839,7 @@ class GameProcess():
                         ["槓", "kan", discord.ButtonStyle.green], 
                         ["跳過", "", discord.ButtonStyle.gray]
                     ]
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     # msg = await self.send_message("you can kan")
@@ -828,7 +860,7 @@ class GameProcess():
                         ["吃", "chi", discord.ButtonStyle.green], 
                         ["跳過", "", discord.ButtonStyle.gray]
                     ]
-                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(next_player), btns, self.check_msg)
                     userinput = await w.create_btn_and_wait(True)
 
                     # msg = await self.send_message("you can chi")
@@ -911,14 +943,23 @@ class GameProcess():
                             else:
                                 could_furo.append([minus2, minus1, chi_pai])
 
+                        btns1 = []
                         chi_num = 0
                         if chi_player.menfon == "N": # 測試用
                             if len(could_furo) > 1:
                                 count = 0
                                 for i in could_furo:
                                     count += 1
-                                    await self.send_message(count, ":", i)
-                                userinput = int(await self.get_input(">>>"))
+                                    btns1.append([str(count), str(count), discord.ButtonStyle.blurple])
+                                    self.tehai_extra_message += f"{count} : {i}\n"
+                                    # await self.send_message()
+                                w1 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns1, self.check_msg)
+                                await self.refresh_tehai()
+                                userinput = await w1.create_btn_and_wait(True)
+                                self.tehai_extra_message = ""
+                                await self.refresh_tehai()
+                                # userinput = int(await self.get_input(">>>"))
+                                userinput = int(userinput)
                                 chi_num = userinput - 1
 
                         self.game.chi(chi_player = next_player, chi_ed_player = playing_player, could_furo = could_furo, chi_num = chi_num)
@@ -1002,19 +1043,24 @@ class GameProcess():
         river_msg += "\n------------------------"
         await self.river_message.edit(content=river_msg)
 
-    async def refresh_tehai(self):
-        player = self.game.players["N"]
+    async def refresh_tehai(self, player:Player=None):
+        if player is None:
+            player = self.game.players["N"]
         tehai_message = ""
         tehai_message += await self.tehai_tran(player=player) + "```1  2  3  4  5  6  7  8  9  10 11 12 13 14```"
-        tehai_message += "\n" + self.tempai_message_text
+        tehai_message += "\n" + self.tempai_message_text + "\n"
+        tehai_message += "\n" + self.tehai_extra_message + "\n"
         await self.tehai_message.edit_original_response(content=tehai_message)
         return tehai_message
 
-    async def generate_tehai_content(self):
-        player = self.game.players["N"]
+    async def generate_tehai_content(self, player:Player=None):
+        if player is None:
+            player = self.game.players["N"]
         tehai_message = ""
         tehai_message += await self.tehai_tran(player=player) + "```1  2  3  4  5  6  7  8  9  10 11 12 13 14```"
-        tehai_message += "\n" + self.tempai_message_text
+        tehai_message += "\n" + self.tempai_message_text + "\n"
+        tehai_message += "\n" + self.tehai_extra_message + "\n"
+        await self.tehai_message.edit_original_response(content=tehai_message)
         return tehai_message
 
     # async def show_river(self):
