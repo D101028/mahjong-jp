@@ -578,6 +578,7 @@ class Game():
                agari_type:str = "tsumo", 
                ron_hai:str = None, 
                is_chyankan = False, 
+               is_open_uradora = False, 
                is_output_yaku = False, 
                is_output_pai_combin = False, 
                is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
@@ -863,7 +864,7 @@ class Game():
                     # 刪除副露刻子
                     for mentsu in mentsu_s:
                         for f in furo_temp:
-                            if is_mentsu_equal(mentsu, f):
+                            if is_mentsu_equal(mentsu, f) and mentsu_judge(f)[0] != "ankan":
                                 del_num.append(count)
                                 furo_temp.remove(f)
                         count += 1
@@ -883,7 +884,7 @@ class Game():
                     # 刪除副露刻子
                     for mentsu in mentsu_s:
                         for f in furo_temp:
-                            if is_mentsu_equal(mentsu, f):
+                            if is_mentsu_equal(mentsu, f) and mentsu_judge(f)[0] != "ankan":
                                 del_num.append(count)
                                 furo_temp.remove(f)
                         count += 1
@@ -898,17 +899,19 @@ class Game():
                         h.remove([2, s.sanankoo])
 
             #     天地和/人和
-            if self.junme == 1:
+            if self.junme == 1 and agari_type == "tsumo":
                 if player.menfon == "E":
                     h.append([13, s.tenhou])
                 else:
                     h.append([13, s.chiihou])
-            
-            self.uradora_pointer = []
-            for i in self.rinshan:
-                self.uradora_pointer.append(self.yama[-1])
-                del self.yama[-1]
-            uradora = [card_plus(i, True, True) for i in self.uradora_pointer]
+            if is_open_uradora:    
+                self.uradora_pointer = []
+                for i in self.rinshan:
+                    self.uradora_pointer.append(self.yama[-1])
+                    del self.yama[-1]
+                uradora = [card_plus(i, True, True) for i in self.uradora_pointer]
+            else:
+                uradora = []
             #     寶牌 # 不是役
             if len(yaku) + len(h) != 0:
                 dora_list = [card_plus(i, True, True) for i in self.rinshan]

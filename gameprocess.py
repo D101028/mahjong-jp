@@ -42,7 +42,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func1(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[0][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -53,7 +53,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func2(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[1][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -64,7 +64,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func3(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[2][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -75,7 +75,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func4(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[3][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -86,7 +86,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func5(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[4][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -97,7 +97,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func6(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[5][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -108,7 +108,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func7(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[6][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -119,7 +119,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func8(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[7][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -130,7 +130,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func9(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[8][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -141,7 +141,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func10(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[9][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -152,7 +152,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func11(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[10][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -163,7 +163,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func12(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[11][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -174,7 +174,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func13(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[12][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -185,7 +185,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func14(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[13][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -196,7 +196,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func15(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[14][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -207,7 +207,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func16(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[15][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -218,7 +218,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func17(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[16][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -229,7 +229,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func18(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[17][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -240,7 +240,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func19(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[18][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -251,7 +251,7 @@ class WaitForClick():
                         super().__init__()
                     @discord.ui.button(label=btn[0], style = btn[2])
                     async def func20(self, interaction: discord.Interaction, button: discord.ui.Button):
-                        self.main_class.finalvalue = btn[1]
+                        self.main_class.finalvalue = self.main_class.btns[19][1]
                         await interaction.response.defer()
                         await self.main_class.check_msg.add_reaction("✅")
                         await self.main_class.check_msg.clear_reactions()
@@ -283,7 +283,7 @@ class JoinView(discord.ui.View):
         await self.main_class.check_msg.add_reaction("✅")
         await self.main_class.check_msg.clear_reactions()
 
-a="4z"
+a="0"
 class GameProcess():
     def __init__(self, bot:commands.Bot, ctx:commands.Context):
         self.ctx = ctx
@@ -315,7 +315,7 @@ class GameProcess():
         self.game = Game()
 
         # 測試用作弊
-        # self.game.players["N"].tehai = ["3m","4m","4m","5m","5m","6m","6m","7m","1z","1z","1z","2z","2z"]
+        # self.game.players["N"].tehai = ["1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z","5z"]
         
         await self.refresh_tehai()
         await self.refresh_river()
@@ -343,24 +343,26 @@ class GameProcess():
                     self.game.draw()
                 player = self.game.players["N"]
                 # global a
-                # if a == "4z": # 超級作弊
-                #     player.tehai[-1] = "3z"
-                #     a = "3z"
-                # elif a == "3z":
-                #     player.tehai[-1] = "2z"
-                #     a = "2z"
-                # elif a == "2z":
+                # if a == "0": # 超級作弊
                 #     player.tehai[-1] = "1z"
                 #     a = "1z"
                 # elif a == "1z":
+                #     player.tehai[-1] = "2z"
+                #     a = "2z"
+                # elif a == "2z":
+                #     player.tehai[-1] = "3z"
+                #     a = "3z"
+                # elif a == "3z":
+                #     player.tehai[-1] = "4z"
+                #     a = "4z"
+                # elif a == "4z":
                 #     player.tehai[-1] = "5z"
-                #     a = "5z"
                 # if self.game.junme == 1: # 作弊一下
-                #     player.tehai = ["5z","4z","1z","1z","1z","2z","2z","2z","3z","3z","3z","4z","4z","4z"]
+                #     player.tehai[-1] = "5z"
                 #     a = "4z"
                 # if self.game.junme == 3:
                     # player.tehai = ["0m","5m","5m","1s","2s","3s","4s","5s","6s","7s","8s","9s","1z","5m"]
-                    # player.tehai[-1] = "0m"
+                    # player.tehai[-1] = "1z"
                 await self.refresh_tehai()
                 # await self.send_message(player.tehai, player.furo)
                 # if not player.is_riichi:
@@ -369,12 +371,21 @@ class GameProcess():
                 # 自摸
                 is_agari = (self.game.hansuu(player, "tsumo") != 0) and is_to_draw
                 if is_agari:
-                    await self.send_message("you can tsumo!", end="")
-                    if "tsumo" in await self.get_input(">>>"):
+                    
+                    btns = [
+                        ["自摸", "tsumo", discord.ButtonStyle.danger], 
+                        ["跳過", "", discord.ButtonStyle.gray]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
+                    # await self.send_message("you can tsumo!", end="")
+                    # userinput = await self.get_input(">>>")
+                    if userinput == "tsumo":
                         await self.send_message("tsumo nia!!")
                         if player.is_riichi:
-                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer), is_code_mode=False)
-                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_output_fusuu=True)
+                            await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_open_uradora=True, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -395,8 +406,15 @@ class GameProcess():
                     tehai_no_aka = akadorasuu_tran(player.tehai.copy())[0]
                     for h in furo_koutsu:
                         if h in tehai_no_aka: # 測試用
-                            await self.send_message("you can kakan", h, end=" ")
-                            userinput = await self.get_input(">>>")
+                            # await self.send_message("you can kakan", h, end=" ")
+                            # userinput = await self.get_input(">>>")
+                            btns = [
+                                ["槓", "kan", discord.ButtonStyle.green], 
+                                ["跳過", "", discord.ButtonStyle.gray]
+                            ]
+                            w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                            userinput = await w.create_btn_and_wait(True)
+
                             if userinput == "kakan" or userinput == "kan":
                                 await self.send_message("kan nia!")
                                 self.game.kakan(h)
@@ -414,8 +432,15 @@ class GameProcess():
                             tehai_temp.remove(h)
                             tehai_temp.remove(h)
                     for pai in ankan_able_pai: # 測試用
-                        await self.send_message("you can ankan", pai, end=" ")
-                        userinput = await self.get_input(">>>")
+                        btns = [
+                            ["槓", "kan", discord.ButtonStyle.green], 
+                            ["跳過", "", discord.ButtonStyle.gray]
+                        ]
+                        w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                        userinput = await w.create_btn_and_wait(True)
+
+                        # await self.send_message("you can ankan", pai, end=" ")
+                        # userinput = await self.get_input(">>>")
                         if userinput == "ankan" or userinput == "kan":
                             await self.send_message("kan nia!")
                             self.game.ankan(pai)
@@ -454,21 +479,70 @@ class GameProcess():
                     is_chi_pon_inner, is_minkan = await self.check(cutting)
                     is_other_action = is_chi_pon_inner or is_minkan
                 elif not is_kakan and not is_ankan: # 槓完直接進下一迴圈(同理摸嶺上牌)
-                    userinput = await self.get_input("切牌>>>")
-                    userinput = userinput.split(" ")
-                    if "riichi" in userinput: # 立直
-                        riichiable, agari_pai = self.game.check_riichi(player = player, cut_num = int(userinput[0])-1)
-                        if riichiable:
-                            player.is_riichi = True
-                            player.riichi_junme = self.game.junme
-                            player.is_tenpai = True
-                            player.tenpais = agari_pai.copy()
-                            player.is_ippatsu_junme = True
-                            await self.send_message("riichi nia!!")
-                        else:
-                            await self.send_message("相公 (指)(怒)")
 
-                    cutting = self.game.cut(int(userinput[0]))
+                    btns = []
+                    count_temp = 0
+                    for t in player.tehai:
+                        count_temp += 1
+                        b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
+                        btns.append(b)
+                    if player.is_menchin():
+                        btns.append(["立直", "riichi", discord.ButtonStyle.danger])
+
+
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
+                    # userinput = await self.get_input("切牌>>>")
+                    # userinput = userinput.split(" ")
+                    if userinput == "riichi": # 立直
+
+                        btns = []
+                        count_temp = 0
+                        for t in player.tehai:
+                            count_temp += 1
+                            b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
+                            btns.append(b)
+                        btns.append(["取消", "cancel", discord.ButtonStyle.grey])
+
+                        w_temp = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                        userinput_temp = await w_temp.create_btn_and_wait(True)
+                        if userinput_temp == "cancel":
+                            btns = []
+                            count_temp = 0
+                            for t in player.tehai:
+                                count_temp += 1
+                                b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
+                                btns.append(b)
+
+                            w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                            userinput = await w2.create_btn_and_wait(True)
+                        else:
+                            riichiable, agari_pai = self.game.check_riichi(player, int(userinput_temp) - 1)
+                            if riichiable:
+                                player.is_riichi = True
+                                player.riichi_junme = self.game.junme
+                                player.is_tenpai = True
+                                player.tenpais = agari_pai.copy()
+                                player.is_ippatsu_junme = True
+                                await self.send_message("riichi nia!!")
+                                userinput = userinput_temp
+                            else:
+                                await self.send_message("相公 :index_pointing_at_the_viewer: :face_with_symbols_over_mouth:  :money_with_wings: :money_with_wings: :money_with_wings: ", is_code_mode=False)
+                                btns = []
+                                count_temp = 0
+                                for t in player.tehai:
+                                    count_temp += 1
+                                    b = [str(count_temp), str(count_temp), discord.ButtonStyle.blurple]
+                                    btns.append(b)
+
+                                w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                                userinput = await w2.create_btn_and_wait(True)
+                    try:
+                        int(userinput)
+                    except:
+                        print(userinput)
+                    cutting = self.game.cut(int(userinput))
                     await self.refresh_tehai()
                     await self.refresh_river()
                     is_tenpai, tenpais = self.game.check_tenpai(player=player)
@@ -515,7 +589,8 @@ class GameProcess():
                 # 測試用作弊
                 # if self.game.playing == "W" and self.game.junme == 1:
                 #     player = self.game.players[self.game.playing]
-                #     player.tehai[-1] = "0m"
+                #     player.tehai[-1] = "1z"
+                #     a = "1z"
                 # elif self.game.playing == "E" and self.game.junme == 3:
                 #     player = self.game.players[self.game.playing]
                 #     player.tehai[-1] = "2z"
@@ -595,7 +670,7 @@ class GameProcess():
                         userinput = await self.get_input(">>>")
                         if userinput == "ron":
                             await self.send_message("ron nia!")
-                            hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
+                            hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_open_uradora=True, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
                             tensuu = self.game.tensuu(hansuu, fusuu, False)
                             await self.send_message(yaku_list)
                             await self.send_message(hansuu, "飜", fusuu, "符")
@@ -624,7 +699,7 @@ class GameProcess():
                     userinput = await self.get_input(">>>")
                     if userinput == "ron":
                         await self.send_message("ron nia!")
-                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_output_yaku=True, is_chyankan=True, is_output_fusuu=True)
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_open_uradora=True, is_output_yaku=True, is_chyankan=True, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -644,13 +719,20 @@ class GameProcess():
         if len(players) != 0:
             for player in players:
                 if player.menfon == "N": # 測試用
-                    await self.send_message("you can ron !")
-                    userinput = await self.get_input(">>>")
+                    # await self.send_message("you can ron !")
+                    # userinput = await self.get_input(">>>")
+                    btns = [
+                        ["榮和", "ron", discord.ButtonStyle.danger], 
+                        ["跳過", "", discord.ButtonStyle.gray]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
                     if userinput == "ron":
                         await self.send_message("ron nia!")
                         if player.is_riichi:
-                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer), is_code_mode = False)
-                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_output_fusuu=True)
+                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
+                        hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_open_uradora=True, is_output_fusuu=True)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -680,9 +762,16 @@ class GameProcess():
                 if player.is_riichi:
                     continue
                 if player.menfon == "N": # 測試用
-                    msg = await self.send_message("you can pon")
-                    userinput = await self.get_input(">>>")
-                    await msg.delete()
+                    btns = [
+                        ["碰", "pon", discord.ButtonStyle.green], 
+                        ["跳過", "", discord.ButtonStyle.gray]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
+                    # msg = await self.send_message("you can pon")
+                    # userinput = await self.get_input(">>>")
+                    # await msg.delete()
                     if userinput == "pon":
                         pon_player = player 
                         pon_ed_player = playing_player
@@ -714,9 +803,16 @@ class GameProcess():
                 if player.is_riichi:
                     continue
                 if player.menfon == "N": # 測試用
-                    msg = await self.send_message("you can kan")
-                    userinput = await self.get_input(">>>")
-                    await msg.delete()
+                    btns = [
+                        ["槓", "kan", discord.ButtonStyle.green], 
+                        ["跳過", "", discord.ButtonStyle.gray]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
+                    # msg = await self.send_message("you can kan")
+                    # userinput = await self.get_input(">>>")
+                    # await msg.delete()
                     if userinput == "kan":
                         self.game.minkan(kan_player = player, kan_ed_player = playing_player)
                         await self.send_message("kan nia!")
@@ -728,9 +824,16 @@ class GameProcess():
             next_player = self.game.players[p_next(self.game.playing)]
             if next_player in players:
                 if next_player.menfon == "N": # 測試用
-                    msg = await self.send_message("you can chi")
-                    userinput = await self.get_input(">>>")
-                    await msg.delete()
+                    btns = [
+                        ["吃", "chi", discord.ButtonStyle.green], 
+                        ["跳過", "", discord.ButtonStyle.gray]
+                    ]
+                    w = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(), btns, self.check_msg)
+                    userinput = await w.create_btn_and_wait(True)
+
+                    # msg = await self.send_message("you can chi")
+                    # userinput = await self.get_input(">>>")
+                    # await msg.delete()
                     if userinput == "chi":
                         chi_ed_player = playing_player
                         chi_player = next_player
@@ -888,7 +991,7 @@ class GameProcess():
             "E":"", "S":"", "W":"", "N":""
         }
         playing_msg[self.game.playing] = " \**"
-        river_msg = "------------------------\n"
+        river_msg = "------------------------\n剩餘張數：{}\n".format(len(self.game.yama)-14)
         # river_msg = "```"
         river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.rinshan) + "\n\n"
         river_msg += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"].river)
@@ -905,6 +1008,14 @@ class GameProcess():
         tehai_message += await self.tehai_tran(player=player) + "```1  2  3  4  5  6  7  8  9  10 11 12 13 14```"
         tehai_message += "\n" + self.tempai_message_text
         await self.tehai_message.edit_original_response(content=tehai_message)
+        return tehai_message
+
+    async def generate_tehai_content(self):
+        player = self.game.players["N"]
+        tehai_message = ""
+        tehai_message += await self.tehai_tran(player=player) + "```1  2  3  4  5  6  7  8  9  10 11 12 13 14```"
+        tehai_message += "\n" + self.tempai_message_text
+        return tehai_message
 
     # async def show_river(self):
     #     rinshan_message = "rinshan:" + " " + str(self.game.rinshan)
