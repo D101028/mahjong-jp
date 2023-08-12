@@ -305,12 +305,13 @@ class GameProcess():
 
         self.tehai_message = discord.Interaction
         illustrate_msg = await self.ctx.send(embed=game_illustration_embed)
-        self.information_msg = await self.ctx.send(content="", view=JoinView(self))
-        self.river_message_1 = await self.ctx.send(content=".")
+        self.river_message_1 = await self.ctx.send(content="", view=JoinView(self))
+        # self.river_message_1 = await self.ctx.send(content=".")
         self.river_message_2 = await self.ctx.send(content=".")
         await wait_for_bot_reaction_add(self.bot)
         
-        await self.information_msg.edit(content="Information message", view = None)
+        # await self.information_msg.edit(content="Information message", view = None)
+        await self.river_message_1.edit(content=".", view = None)
         
         self.tempai_message_text = ""
         self.tehai_extra_message = ""
@@ -1027,11 +1028,9 @@ class GameProcess():
         river_msg2 += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"])
         river_msg2 += "\n--------------------"
         
-        print(info_msg, river_msg1, river_msg2)
-        return 
-        await self.information_msg.edit(content = info_msg)
+        # await self.information_msg.edit(content = info_msg)
         if is_refresh_all:
-            await self.river_message_1.edit(content = river_msg1)
+            await self.river_message_1.edit(content = info_msg + "\n" + river_msg1)
             await self.river_message_2.edit(content = river_msg2)
         elif self.game.playing in ("E","S"):
             await self.river_message_1.edit(content = river_msg1)
