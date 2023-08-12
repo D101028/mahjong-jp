@@ -177,6 +177,8 @@ class Player():
         # 同巡振聽
         self.doujun_furiten_pai = []
         self.doujun_furiten = False
+
+        self.riichi_river_num = None
     
     def sort(self, userinput: list, index = ["m","p","s","z"]):
         # 理牌
@@ -759,8 +761,12 @@ class Game():
                     h.remove([3,s.ryanpeekoo+s.question_mark])
                 if [26,s.junseichuurenpouton] in h: # 九蓮
                     h.remove([26,s.junseichuurenpouton])
+                    if not [6,s.chiniisoo] in h: # 清一色會炸
+                        h.append([6,s.chiniisoo])
                 if [13,s.chuurenpouton] in h: # 九蓮
                     h.remove([13,s.chuurenpouton])
+                    if not [6,s.chiniisoo] in h:
+                        h.append([6,s.chiniisoo])
             # 九蓮特判
             if [13,s.chuurenpouton] in h:
                 t = normal_tehai[:-1]
@@ -1588,14 +1594,17 @@ class GameProcessTest():
 
 
 if __name__=="__main__":
-    GameProcessTest()
+    # GameProcessTest()
     # print(Game.tensuu(None, 1, 30, False))
     # tehai = ["1z", "1z", "1z", "4z", "4z", "5m", "6m", "7m", "1s", "1s", "1s", "2s", "3s", "1s"]
     # print(Game.is_agari(self = None, tehai = tehai))
-    # g = Game()
+    g = Game()
     # print(g.rinshan)
-    # p = g.players["N"]
-    # p.tehai = ["1m","2m","3m","2m","3m","4m","7m","7m","7m","1s","2s","3s","5s"]
+    p = g.players["N"]
+    # p.tehai = ["1s","1s","4s","5s","6s","7s","8s","9s","9s","9s","1s","2s","2s","2s"]
+    p.tehai = ["1s","1s","4s","5s","6s","7s","8s","9s","9s","9s","1s"]
+    p.furo = [["2s*", "1s", "3s"]]
+    print(g.hansuu(p, "tsumo", None, is_output_fusuu=True))
 
     # p.furo = [["7m*","8m","9m"]]
     # p.tehai = ["1m","2m","3m","4m","4m","5m","6m","6m","9m","9m"]
