@@ -229,11 +229,13 @@ class Game():
         }
         self.chanfon = "E"
         self.junme = 0 # 巡數
-        self.rinshan = [self.yama[0]]
+        self.dora_pointer = [self.yama[0]]
         del self.yama[0]
 
         self.uradora_pointer = []
         
+        self.dora_pointer_suu = 1
+
         # 嶺上開花巡
         self.rinshankaihou_able = False
         # self.draw()
@@ -498,9 +500,10 @@ class Game():
 
 
         # 翻寶牌指示牌
-        self.rinshan.append(self.yama[0])
+        self.dora_pointer.append(self.yama[0])
         del self.yama[0]
-        # print("rinshan:",self.rinshan)
+        self.uradora_pointer += 1
+        # print("rinshan:",self.dora_pointer)
 
         # 嶺上開花巡
         self.rinshankaihou_able = True
@@ -904,17 +907,14 @@ class Game():
                     h.append([13, s.tenhou])
                 else:
                     h.append([13, s.chiihou])
-            if is_open_uradora:    
-                self.uradora_pointer = []
-                for i in self.rinshan:
+            if is_open_uradora and len(self.uradora_pointer)<len(self.dora_pointer):
+                while len(self.uradora_pointer)!=len(self.dora_pointer):
                     self.uradora_pointer.append(self.yama[-1])
                     del self.yama[-1]
-                uradora = [card_plus(i, True, True) for i in self.uradora_pointer]
-            else:
-                uradora = []
+            uradora = [card_plus(i, True, True) for i in self.uradora_pointer]
             #     寶牌 # 不是役
             if len(yaku) + len(h) != 0:
-                dora_list = [card_plus(i, True, True) for i in self.rinshan]
+                dora_list = [card_plus(i, True, True) for i in self.dora_pointer]
                 if akadorasuu != 0:
                     h.append([akadorasuu, s.akadora])
                 dorasuu = 0
@@ -997,9 +997,9 @@ class Game():
             return 25
         if is_pinfu:
             if agari_type == "tsumo":
-                return 30
-            else:
                 return 20
+            else:
+                return 30
         # 底符
         fu = 20
         # 門前加符

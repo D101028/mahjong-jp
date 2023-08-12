@@ -316,7 +316,7 @@ class GameProcess():
         self.game = Game()
 
         # 測試用作弊
-        # self.game.players["N"].tehai = ["3m","4m","4m","5m","0m","6m","6m","7m","1z","1z","1z","2z","2z"]
+        self.game.players["N"].tehai = ["1s","1s","1s","2s","3s","4s","5s","6s","7s","8s","9s","9s","9s"]
         
         await self.refresh_tehai()
         await self.refresh_river()
@@ -327,7 +327,7 @@ class GameProcess():
         is_to_draw = True # 是否摸牌
         is_ankan_out = False # 紀錄上一次是否為暗槓
         count = 0
-        while len(self.game.yama) > 14 or (len(self.game.yama)==14 and not is_to_draw):
+        while len(self.game.yama)+self.game.dora_pointer_suu > 14 or (len(self.game.yama)+self.game.dora_pointer_suu==14 and not is_to_draw):
             if self.is_finished:
                 return
             # await self.refresh_tehai()
@@ -384,9 +384,8 @@ class GameProcess():
                     # userinput = await self.get_input(">>>")
                     if userinput == "tsumo":
                         await self.send_message("tsumo nia!!")
-                        if player.is_riichi:
-                            await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player=player, agari_type="tsumo", is_open_uradora=True, is_output_fusuu=True)
+                        await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -450,7 +449,6 @@ class GameProcess():
                             await self.kokushi_chyankan_check(pai)
 
                 if player.is_riichi: # 立直摸切
-                    time.sleep(3)
                     cutting = self.game.cut(0)
                     await self.refresh_tehai()
                     await self.refresh_river()
@@ -539,10 +537,6 @@ class GameProcess():
 
                                 w2 = WaitForClick(self.bot, self.tehai_message, await self.generate_tehai_content(player), btns, self.check_msg)
                                 userinput = await w2.create_btn_and_wait(True)
-                    try:
-                        int(userinput)
-                    except:
-                        print(userinput)
                     cutting = self.game.cut(int(userinput))
                     await self.refresh_tehai()
                     await self.refresh_river()
@@ -575,9 +569,9 @@ class GameProcess():
                         if is_ankan_out: # 暗槓不翻
                             pass 
                         else: # 明加槓翻寶牌指示牌
-                            self.game.rinshan.append(self.game.yama[0])
+                            self.game.dora_pointer.append(self.game.yama[0])
                             del self.game.yama[0]
-                            # await self.send_message("rinshan:",self.game.rinshan)
+                            # await self.send_message("rinshan:",self.game.dora_pointer)
                         self.game.rinshankaihou_able = False
                 # print(player.is_menchin(), player.tehai, player.furo)
 
@@ -681,6 +675,7 @@ class GameProcess():
                         if userinput == "ron":
                             await self.send_message("ron nia!")
                             hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_open_uradora=True, is_output_yaku=True, is_chyankan=True,is_output_fusuu=True)
+                            await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                             tensuu = self.game.tensuu(hansuu, fusuu, False)
                             await self.send_message(yaku_list)
                             await self.send_message(hansuu, "飜", fusuu, "符")
@@ -719,6 +714,7 @@ class GameProcess():
                     if userinput == "ron":
                         await self.send_message("ron nia!")
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", kan_pai, is_open_uradora=True, is_output_yaku=True, is_chyankan=True, is_output_fusuu=True)
+                        await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -749,9 +745,8 @@ class GameProcess():
 
                     if userinput == "ron":
                         await self.send_message("ron nia!")
-                        if player.is_riichi:
-                            await self.send_message(await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                         hansuu, yaku_list, pai_combin, fusuu = self.game.hansuu(player, "ron", c, is_open_uradora=True, is_output_fusuu=True)
+                        await self.send_message("裡寶指示：", await self.pai_list_emoji_tran(self.game.uradora_pointer) + ".", is_code_mode = False)
                         tensuu = self.game.tensuu(hansuu, fusuu, False)
                         await self.send_message(yaku_list)
                         await self.send_message(hansuu, "飜", fusuu, "符")
@@ -762,6 +757,9 @@ class GameProcess():
                         if player.is_riichi: # 立直振聽
                             player.furiten_pai.append(akadora_str_tran(c))
                             player.furiten = True
+                            if not "furiten" in self.tempai_message_text:
+                                self.tempai_message_text += "furiten"
+                                await self.refresh_tehai()
 
         # 同巡振聽
         for p in MENFON_INDEX:
@@ -773,6 +771,9 @@ class GameProcess():
             if self.game.is_agari(tehai):
                 player.doujun_furiten_pai = self.game.check_tenpai(player = player, overright=False)[1]
                 player.doujun_furiten = True
+                if player.menfon == "N" and not "furiten" in self.tempai_message_text:
+                    self.tempai_message_text += "furiten"
+                    await self.refresh_tehai()
 
         # 碰
         players = await self.pon_able(c)
@@ -1032,9 +1033,9 @@ class GameProcess():
             "E":"", "S":"", "W":"", "N":""
         }
         playing_msg[self.game.playing] = " \**"
-        river_msg = "------------------------\n剩餘張數：{}\n".format(len(self.game.yama)-14)
+        river_msg = "------------------------\n剩餘張數：{}\n".format(len(self.game.yama)+self.game.dora_pointer_suu-14)
         # river_msg = "```"
-        river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.rinshan) + "\n\n"
+        river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.dora_pointer) + "\n\n"
         river_msg += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"].river)
         river_msg += "南" + playing_msg["S"] + "\n" + await self.river_tran(self.game.players["S"].river)
         river_msg += "西" + playing_msg["W"] + "\n" + await self.river_tran(self.game.players["W"].river)
@@ -1064,7 +1065,7 @@ class GameProcess():
         return tehai_message
 
     # async def show_river(self):
-    #     rinshan_message = "rinshan:" + " " + str(self.game.rinshan)
+    #     rinshan_message = "rinshan:" + " " + str(self.game.dora_pointer)
     #     river_msg = "```{}```".format(rinshan_message+"\n\n東\n\n\n\n\n南\n\n\n\n\n西\n\n\n\n\n北\n\n\n\n.")
     #     await self.river_message.edit(content = river_msg)
 
