@@ -304,14 +304,16 @@ class GameProcess():
         self.check_msg = await self.ctx.send("Ignore this message.")
 
         self.tehai_message = discord.Interaction
-        self.tehai_extra_message = ""
         illustrate_msg = await self.ctx.send(embed=game_illustration_embed)
-        self.river_message = await self.ctx.send(content=" ", view=JoinView(self))
+        self.information_msg = await self.ctx.send(content="", view=JoinView(self))
+        self.river_message_1 = await self.ctx.send(content=".")
+        self.river_message_2 = await self.ctx.send(content=".")
         await wait_for_bot_reaction_add(self.bot)
-        # await illustrate_msg.delete()
-        await self.river_message.edit(content="River Message", view = None)
-        # self.tehai_message = await self.ctx.send("Tehai Message")
+        
+        await self.information_msg.edit(content="Information message", view = None)
+        
         self.tempai_message_text = ""
+        self.tehai_extra_message = ""
 
         self.game = Game()
 
@@ -614,9 +616,11 @@ class GameProcess():
         string = ""
         if not self.is_finished:
             for m in MENFON_INDEX: # 荒牌流局
+                player = self.game.players[m]
                 string += m + ": "
-                if self.game.players[m].is_tenpai:
+                if player.is_tenpai:
                     string += "Tenpai:"+str(player.tenpais) + "\n"
+                    string += await self.tehai_tran(player) + "\n"
                 else:
                     string += "No ten" + "\n"
         await self.send_message(string)
@@ -1006,23 +1010,31 @@ class GameProcess():
                 players.append(player)
         return players
 
-    async def refresh_river(self):
+    async def refresh_river(self, is_refresh_all:bool = True):
         playing_msg = {
             "E":"", "S":"", "W":"", "N":""
         }
+        info_msg = ""
         playing_msg[self.game.playing] = " \**"
-        river_msg = "\\_\\_\n剩餘張數：{}\n".format(len(self.game.yama)+self.game.dora_pointer_suu-14)
-        # river_msg = "```"
-        river_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.dora_pointer) + "\n\n"
-        river_msg += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"])
-        river_msg += "南" + playing_msg["S"] + "\n" + await self.river_tran(self.game.players["S"])
-        river_msg += "西" + playing_msg["W"] + "\n" + await self.river_tran(self.game.players["W"])
-        river_msg += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"])
-
-        river_msg += "\n\\_\\_"
-        # print(river_msg)
-        # print(len(river_msg))
-        await self.river_message.edit(content=river_msg)
+        info_msg += "\n剩餘張數：{}\n".format(len(self.game.yama)+self.game.dora_pointer_suu-14)
+        info_msg += "寶牌指示：" + await self.pai_list_emoji_tran(self.game.dora_pointer) + "\n\n"
+        river_msg1 = "--------------------\n"
+        river_msg2 = ""
+        river_msg1 += "東" + playing_msg["E"] + "\n" + await self.river_tran(self.game.players["E"])
+        river_msg1 += "南" + playing_msg["S"] + "\n" + await self.river_tran(self.game.players["S"])
+        river_msg1 += "."
+        river_msg2 += "西" + playing_msg["W"] + "\n" + await self.river_tran(self.game.players["W"])
+        river_msg2 += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"])
+        river_msg2 += "\n--------------------"
+        
+        await self.information_msg.edit(content = info_msg)
+        if is_refresh_all:
+            await self.river_message_1.edit(content = river_msg1)
+            await self.river_message_2.edit(content = river_msg2)
+        elif self.game.playing in ("E","S"):
+            await self.river_message_1.edit(content = river_msg1)
+        else:
+            await self.river_message_2.edit(content = river_msg2)
 
     async def refresh_tehai(self, player:Player=None):
         if player is None:

@@ -205,7 +205,8 @@ class Player():
 
 class Game():
     def __init__(self):
-        yama = [] + INDEX[2]
+        # yama = [] + INDEX[2]
+        yama = [] + INDEX[1]
         random.shuffle(yama)
         self.yama = yama # 牌山序列
         self.playing = "E" # 打出玩家
