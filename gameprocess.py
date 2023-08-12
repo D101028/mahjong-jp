@@ -623,7 +623,7 @@ class GameProcess():
                     string += await self.tehai_tran(player) + "\n"
                 else:
                     string += "No ten" + "\n"
-        await self.send_message(string)
+        await self.send_message(string, is_code_mode=False)
     
     async def send_message(self, *values, end = None, is_code_mode:bool = True) -> discord.Message:
         string = "```\n" if is_code_mode else ""
