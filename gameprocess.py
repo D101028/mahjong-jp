@@ -1027,6 +1027,8 @@ class GameProcess():
         river_msg2 += "北" + playing_msg["N"] + "\n" + await self.river_tran(self.game.players["N"])
         river_msg2 += "\n--------------------"
         
+        print(info_msg, river_msg1, river_msg2)
+        return 
         await self.information_msg.edit(content = info_msg)
         if is_refresh_all:
             await self.river_message_1.edit(content = river_msg1)
