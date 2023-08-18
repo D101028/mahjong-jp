@@ -1,3 +1,3 @@
 D:
-cd D:\python\mahjong-jp
+cd D:\workplace\mahjong-jp-main
 python DCmahjong.py

@@ -193,7 +193,20 @@ class Player():
             elif i[1] == index[3]:
                 clubs[3].append(i)
         for i in clubs:
+            num = 0
+            pos = 0
+            for j in i:
+                if j[0] == "0":
+                    num += 1 
+                    i[pos] = "5" + j[1]
+                pos += 1
             i.sort()
+            pos = 0
+            while num != 0:
+                if i[pos][0] == "5":
+                    i[pos] = "0" + i[pos][1]
+                    num -= 1
+                pos += 1
         return clubs[0] + clubs[1] + clubs[2] + clubs[3]
 
     def is_menchin(self):
@@ -264,7 +277,20 @@ class Game():
             elif i[1] == index[3]:
                 clubs[3].append(i)
         for i in clubs:
+            num = 0
+            pos = 0
+            for j in i:
+                if j[0] == "0":
+                    num += 1 
+                    i[pos] = "5" + j[1]
+                pos += 1
             i.sort()
+            pos = 0
+            while num != 0:
+                if i[pos][0] == "5":
+                    i[pos] = "0" + i[pos][1]
+                    num -= 1
+                pos += 1
         return clubs[0] + clubs[1] + clubs[2] + clubs[3]
     def draw(self):
         # 摸牌
@@ -505,7 +531,7 @@ class Game():
         # 翻寶牌指示牌
         self.dora_pointer.append(self.yama[0])
         del self.yama[0]
-        self.uradora_pointer += 1
+        self.dora_pointer_suu += 1
         # print("rinshan:",self.dora_pointer)
 
         # 嶺上開花巡
@@ -653,7 +679,7 @@ class Game():
             yaku.append([1,s.chyankan])
 
         # 海底撈月、河底摸魚
-        if len(self.yama) == 0:
+        if len(self.yama)+self.dora_pointer_suu==14:
             han += 1
             if agari_type == "tsumo":
                 yaku.append([1,s.haiteiraoyue])
@@ -806,7 +832,7 @@ class Game():
             #     平和
             if is_menchin and len(mentsu_s) == 4:
                 junsuu = 0
-                rianmen = False
+                is_rianmen = False
                 for mentsu in mentsu_s:
                     if mentsu[0] in (s.yakuhai_ton,s.yakuhai_nan,s.yakuhai_shaa,s.yakuhai_pei):
                         continue
@@ -815,8 +841,9 @@ class Game():
                     else:
                         junsuu += 1
                         if agari_hai in (mentsu[0]+mentsu[3], mentsu[2]+mentsu[3]):
-                            rianmen = True
-                if junsuu == 4 and rianmen:
+                            is_rianmen = True
+                dict_temp = {"E":"1z","S":"2z","W":"3z","N":"4z"}
+                if junsuu == 4 and is_rianmen and not toitsu[1:] in (dict_temp[self.chanfon], dict_temp[player.menfon], "5z", "6z", "7z"):
                     h.append([1, s.pinfu])
 
             #     四槓子
@@ -827,6 +854,9 @@ class Game():
                     kan += 1
             if kan == 4:
                 h.append([13, s.suukantsu])
+            #     三槓子
+            if kan == 3:
+                h.append([2, s.sankantsu])
             #     對對和/三暗刻/四暗刻/單騎
             if [13, s.suuankoo] in h or [26, s.suuankootanki] in h:
                 ankan = 0
@@ -885,6 +915,7 @@ class Game():
                     for mentsu in m_temp:
                         if agari_hai == mentsu[0]+mentsu[-1]:
                             h.remove([2, s.sanankoo])
+                            break
                 else:
                     m_temp = mentsu_s.copy()
                     furo_temp = player.furo.copy()
