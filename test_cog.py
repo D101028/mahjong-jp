@@ -14,8 +14,7 @@ class TestCog(commands.Cog):
     @commands.command()
     async def tt(self, ctx:commands.Context):
         author = ctx.message.author
-        print(author.name, author.nick, author.id)
-        await ctx.reply(content = "HI!", ephemeral=True)
+        await ctx.send(author.nick)
 
     @commands.command()
     async def ttt(self, ctx:commands.Context):

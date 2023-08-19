@@ -285,7 +285,10 @@ class JoinView(discord.ui.View):
         player.is_robot = False 
         player.tehai_message = interaction
         author = interaction.user
-        player.name, player.nick, player.id = author.name, author.nick, author.id 
+        player.name = author.name 
+        nick = author.nick
+        player.nick = nick if nick != None else player.name 
+        player.id = author.id 
         await self.main_class.check_msg.add_reaction("✅")
         await self.main_class.check_msg.clear_reactions()
     
@@ -295,7 +298,9 @@ class JoinView(discord.ui.View):
         player = self.main_class.players_status[self.main_class.rd_pos[0]]
         del self.main_class.rd_pos[0]
         player.is_robot = True 
-        player.name, player.nick, player.id = "CPU", "CPU", -1
+        player.name = "CPU"
+        player.nick = "CPU"
+        player.id = -1
         await self.main_class.check_msg.add_reaction("✅")
         await self.main_class.check_msg.clear_reactions()
 
@@ -304,7 +309,7 @@ class PlayerStatus():
         self.is_robot = None
         self.tehai_message = discord.Interaction 
         self.name = "waiting..."
-        self.nick = str
+        self.nick = "waiting..."
         self.id = int
         
         self.tempai_message_text = str
@@ -356,7 +361,7 @@ class GameProcess():
             string_temp = ""
             dict_temp = {"E":"東", "S":"南", "W":"西", "N":"北"}
             for p in ["E", "S", "W", "N"]:
-                string_temp += dict_temp[p]+"："+self.players_status[p].name + "\n"
+                string_temp += dict_temp[p]+"："+self.players_status[p].nick + "\n"
             await self.player_msg.edit(content=string_temp)
         
         # await self.information_msg.edit(content="Information message", view = None)
@@ -605,7 +610,7 @@ class GameProcess():
                                 await self.send_message("riichi nia!!")
                                 userinput = userinput_temp
                             else:
-                                await self.send_message("相公 :index_pointing_at_the_viewer: :face_with_symbols_over_mouth:  :money_with_wings: :money_with_wings: :money_with_wings: ", is_code_mode=False)
+                                await self.send_message(f"<@{player_status.id}> 相公 :index_pointing_at_the_viewer: :face_with_symbols_over_mouth:  :money_with_wings: :money_with_wings: :money_with_wings: ", is_code_mode=False)
                                 btns = []
                                 count_temp = 0
                                 for t in player.tehai:
