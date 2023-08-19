@@ -366,9 +366,9 @@ class GameProcess():
 
         # 測試用作弊
         # self.game.players["E"].tehai = ["1m","9m","9s","9s","1p","9p","1z","2z","3z","4z","5z","6z","7z"]
-        self.game.players["E"].tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","4s","5s","1z","1z"]
-        self.game.players["S"].tehai = ["1s","1s","1s","2s","2s","2s","3s","3s","3s","4s","4s","4s","5s"]
-        self.game.players["W"].tehai = ["1s","1s","1s","2s","2s","2s","3s","9s","9s","4s","4s","4s","5s"]
+        # self.game.players["E"].tehai = ["1m","2m","3m","4m","5m","6m","7m","8m","9m","4s","5s","1z","1z"]
+        # self.game.players["S"].tehai = ["1s","1s","1s","2s","2s","2s","3s","3s","3s","4s","4s","4s","5s"]
+        # self.game.players["W"].tehai = ["1s","1s","1s","2s","2s","2s","3s","9s","9s","4s","4s","4s","5s"]
         
         for p in ["E","S","W","N"]:
             player = self.game.players[p]
