@@ -93,7 +93,7 @@ def akadorasuu_tran(tehai:list[str])->tuple[list,int]:
         count += 1
     return tehai, dora
 
-def mentsu_judge(mentsu:list[str]) -> tuple[str, int or None]:
+def mentsu_judge(mentsu:list[str]) -> tuple[str, int | None]:
     """output: ('ankan', None) ('juntsu', 0) ('koutsu', pos) ('minkan', pos) ('kakan', pos)"""
     mentsu = akadorasuu_tran(mentsu)[0]
     if mentsu[0][0] != mentsu[1][0]:
@@ -613,7 +613,7 @@ class Game():
                is_open_uradora = False, 
                is_output_yaku = False, 
                is_output_pai_combin = False, 
-               is_output_fusuu = False) -> int or tuple[int,list[list]] or tuple[int,list[list],str] or tuple[int,list[list],str,int]:
+               is_output_fusuu = False) -> int | tuple[int,list[list]] | tuple[int,list[list],str] | tuple[int,list[list],str,int]:
         """飜數計算 >>>`is_output_yaku` `is_output_pai_combin` `is_output_fusuu` 為向上必須"""
         if is_output_fusuu:
             is_output_yaku, is_output_pai_combin = True, True
@@ -1185,7 +1185,7 @@ class Game():
                 player.tenpais = agari_pai.copy()
             return is_tenpai, agari_pai.copy()
     
-    def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] or None]:
+    def check_riichi(self, player:Player, cut_num:int) -> tuple[bool, list[str] | None]:
         if not player.is_menchin():
             return False, None
         tehai = player.tehai.copy()
