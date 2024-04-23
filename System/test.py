@@ -23,13 +23,13 @@ from ext import support
 
 # s = "11122233399s11z"
 # s = "1112223334449s"
-s = "2233445566778s"
-# f1 = ""
+s = "2345566778s"
+f1 = "234s"
 # f2 = "1111s"
 # f3 = "1111m"
 # f4 = "1111z"
 pai_list = create_pai_list(s)
-# f_pai_list1 = create_pai_list(f1)
+f_pai_list1 = create_pai_list(f1)
 # f_pai_list2 = create_pai_list(f2)
 # f_pai_list3 = create_pai_list(f3)
 # f_pai_list4 = create_pai_list(f4)
@@ -49,12 +49,12 @@ param = Param(
 )
 
 tehai = Tehai(pai_list)
-# furo1 = Furo(lang.minkan, tuple(f_pai_list1), 2)
+furo1 = Furo(lang.shuntsu, tuple(f_pai_list1), 2)
 # furo2 = Furo(lang.minkan, tuple(f_pai_list2), 2)
 # furo3 = Furo(lang.minkan, tuple(f_pai_list3), 2)
 # furo4 = Furo(lang.minkan, tuple(f_pai_list4), 2)
 
-# tehai.furo_list.append(furo1)
+tehai.furo_list.append(furo1)
 # tehai.furo_list.append(furo2)
 # tehai.furo_list.append(furo3)
 # tehai.furo_list.append(furo4)

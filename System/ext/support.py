@@ -223,12 +223,54 @@ furo_minus_yaku_list = [
 ]
 
 # 古役
-ichihan_koyaku_list = []
-nihan_koyaku_list = []
-sanhan_koyaku_list = []
-rokuhan_koyaku_list = []
-yakuman_koyaku_list = []
-daburu_yakuman_koyaku_list = []
+ichihan_koyaku_list = [
+    lang.tsubamegaeshi, 
+    lang.kanfuri, 
+    lang.shiiaruraotai, 
+    lang.shousanfon
+]
+nihan_koyaku_list = [
+    lang.sanrenkoo, 
+    lang.sanfonkoo, 
+    lang.chaopaikoo, 
+    lang.teinsankoo, 
+    lang.chinpaikoo, 
+    lang.uumensai, 
+    lang.ryanankan
+]
+sanhan_koyaku_list = [
+    lang.isshokusanjun, 
+    lang.tanhonhoo, 
+    lang.ryansuushun
+]
+rokuhan_koyaku_list = [
+    lang.chitanhonhoo
+]
+yakuman_koyaku_list = [
+    lang.suurenkoo, 
+    lang.isshokuyonjun, 
+    lang.gozokukyouwa, 
+    lang.renhou, 
+    lang.suukantsuraotai, 
+    lang.suukanrinshan, 
+    lang.katengecchi, 
+    lang.ishiuesannen, 
+    lang.sanankan, 
+    # can be daburu yakuman
+    lang.heiiisoo, 
+    lang.benikujyaku, 
+    lang.daisharin, 
+    lang.daisuurin, 
+    lang.daichikurin, 
+    lang.sanshokudooankoo
+]
+daburu_yakuman_koyaku_list = [
+    lang.junseisuurenkoo, 
+    lang.daichisei, 
+    lang.junseiheiiisoo, 
+    lang.sanshokudookan, 
+    lang.suuankan
+]
 mechin_only_koyaku_list = []
 furo_minus_koyaku_list = []
 

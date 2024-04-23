@@ -70,8 +70,10 @@ def create_pai(name: str):
     return Pai(name)
 
 def create_pai_list(name_list: Union[list[str], str]):
+    if not isinstance(name_list, Union[list, str]):
+        raise TypeError(f"name_list should be a str list or a str, not '{type(name_list).__name__}'")
     pai_list = []
-    if type(name_list) == str:
+    if isinstance(name_list, str):
         num_list: list[str] = []
         for i in name_list:
             try:
@@ -144,7 +146,7 @@ class Toitsu:
         self.pai_list = pai_list if not pai_list is None else [pai, pai.copy()]
     
     def __eq__(self, other):
-        if isinstance(other, Toitsu):
+        if not isinstance(other, Toitsu):
             return False
         return self.pai_list[0] == other.pai_list[0]
 

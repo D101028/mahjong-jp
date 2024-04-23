@@ -55,8 +55,7 @@ class GameRound:
     
     def run_yonin_ton_ikkyoku(self):
         if self.gametype != lang.yonin_ton_ikkyoku:
-            print("Error 1")
-            exit()
+            raise RuntimeError("Error")
         
         if self.chanfon == support.fonwei_tuple[0] and self.round == 1 and self.benchan == 0:
             # init players' data            
