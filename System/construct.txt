@@ -1,0 +1,10 @@
+lang.tc.py
+ext.support.py
+ext.index.py
+
+game.py
+    gamecore.py
+    player.py
+        pai.py
+
+gameactione.py

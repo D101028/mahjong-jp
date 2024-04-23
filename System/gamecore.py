@@ -9,6 +9,7 @@ from player import Player
 from pai import Yama
 from gameaction import Performer
 
+from typing import Union
 import random
 
 class GameCore:
@@ -21,7 +22,7 @@ class GameCore:
 
     def process(self):
         self.gameround = GameRound(gametype = self.gametype, 
-                                   chanfon = support.chanfon_list[0], 
+                                   chanfon = support.fonwei_tuple[0], 
                                    rnd = 1, 
                                    benchan = 0)
         while True:
@@ -33,8 +34,7 @@ class GameCore:
 
     def run(self):
         self.process()
-        
-        
+
 class GameRound:
     def __init__(self, gametype:str, chanfon:str, rnd:str, benchan:int, players:list[Player]):
         self.gametype = gametype
@@ -44,6 +44,7 @@ class GameRound:
         self.players = players
         self.player_pos_in_action = 0 # 0:ton, 1:nan, 2:shaa, 3:pei
         self.yama = Yama(gametype)
+        self.junme = 0 # plus 1 if 東家摸牌 or 任一人吃、碰、槓、拔北
 
         self.performer = Performer()
 
@@ -57,10 +58,10 @@ class GameRound:
             print("Error 1")
             exit()
         
-        if self.chanfon == support.chanfon_list[0] and self.round == 1 and self.benchan == 0:
+        if self.chanfon == support.fonwei_tuple[0] and self.round == 1 and self.benchan == 0:
             # init players' data            
             # set players' positions and tensuu
-            pos_list = support.chanfon_list[0:4]
+            pos_list = support.fonwei_tuple[0:4]
             random.shuffle(pos_list)
             count = 0
             for player in self.players:
@@ -84,12 +85,14 @@ class GameRound:
             # the player in this round
             player = self.players[self.player_pos_in_action]
 
+            self.yama.draw(player)
+
+            # tsumo
             
-
-
 
             self.player_pos_in_action = (self.player_pos_in_action + 1) % 4
 
     def next_round(self):
         # clear and change players' data
         return 
+    
