@@ -6,8 +6,8 @@ from lang import tc as lang
 from ext import support
 
 from player import Player
-from pai import Yama
-from gameaction import Performer
+from pai import *
+from action import Performer
 
 from typing import Union
 import random
@@ -36,15 +36,17 @@ class GameCore:
         self.process()
 
 class GameRound:
-    def __init__(self, gametype:str, chanfon:str, rnd:str, benchan:int, players:list[Player]):
-        self.gametype = gametype
-        self.chanfon = chanfon
-        self.round = rnd
+    """一局遊戲(ex 東一局、東二局)"""
+    def __init__(self, gametype:str, chanfon:str, rnd:int, riichiboo:int, benchan:int, players:list[Player]):
+        self.gametype = gametype # lang.yonin_ton_ikkyoku, lang.yonin_ton, lang.yonin_nan, lang.sannin_ton_ikkyoku, lang.sannin_ton, lang.sannin_nan
+        self.chanfon = chanfon # lang.ton, lang.nan, lang.shaa, lang.pei, support.fonwei_tuple[i]
+        self.round = rnd # 東一局:  1, 東二: 2, ..., 南一: 5, ...
+        self.riichiboo = riichiboo
         self.benchan = benchan
-        self.players = players
+        self.players = players # {lang.ton: Player, lang.nan: Player, ...}
         self.player_pos_in_action = 0 # 0:ton, 1:nan, 2:shaa, 3:pei
         self.yama = Yama(gametype)
-        self.junme = 0 # plus 1 if 東家摸牌 or 任一人吃、碰、槓、拔北
+        # self.junme = 0 # plus 1 if 東家摸牌 or 任一人吃、碰、槓、拔北
 
         self.performer = Performer()
 
@@ -86,8 +88,11 @@ class GameRound:
 
             self.yama.draw(player)
 
-            # tsumo
-            
+            player_round = PlayerRound(player = player, 
+                                       yama = self.yama, 
+                                       chanfon = self.chanfon)
+
+            player_round.run()
 
             self.player_pos_in_action = (self.player_pos_in_action + 1) % 4
 
@@ -95,3 +100,62 @@ class GameRound:
         # clear and change players' data
         return 
     
+class PlayerRound:
+    """玩家摸牌、打牌一次"""
+    def __init__(self, gametype: str, player: Player, yama: Yama, chanfon: str, is_ankan_rinshan: bool = False) -> None:
+        self.gametype = gametype
+        self.player = player
+        self.yama = yama
+        self.chanfon = chanfon
+        self.is_ankan_rinshan = is_ankan_rinshan
+
+    def run(self):
+        if self.gametype in (lang.yonin_ton_ikkyoku):
+            self.run_yonin()
+
+    def run_yonin(self):
+        # 玩家摸牌
+        pai = self.yama.draw(self.player) # including adding player_junme
+
+        # 自摸判定
+        if is_agari(self.player.tehai.pai_list + [pai]):
+            param = Param(self.player.is_riichi, 
+                          self.player.riichi_junme, 
+                          self.player.player_junme, 
+                          True, False, False, 
+                          self.yama.get_available_pai_num(), 
+                          self.player.menfon, 
+                          self.chanfon, 
+                          self.is_ankan_rinshan)
+            agari_result = AgariResult(self.player.tehai, agari_pai=pai, param=param)
+
+        # 暗槓處理
+
+        # 玩家打牌
+
+        # 榮和判斷
+
+        # 鳴牌處理
+
+        # 四槓流局判斷
+
+        # 荒牌流局判斷
+    
+    def run_sanin(self):
+        # 玩家摸牌
+        self.yama.draw(self.player)
+
+        # 自摸判定
+
+        # 暗槓(拔北)處理
+
+        # 玩家打牌
+
+        # 榮和判斷
+
+        # 鳴牌處理
+
+        # 四槓流局判斷
+
+        # 荒牌流局判斷
+        

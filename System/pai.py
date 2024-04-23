@@ -108,9 +108,12 @@ class Yama:
         self.dora_pointers.append(self.pai_list[0])
         del self.pai_list[0]
     
-    def draw(self, player):
-        player.tsumo_pai = self.pai_list[0]
+    def draw(self, player) -> Pai:
+        pai = self.pai_list[0]
+        player.tsumo_pai = pai
+        player.player_junme += 1
         del self.pai_list[0]
+        return pai
     
     def get_available_pai_num(self):
         if self.gametype == lang.yonin_ton_ikkyoku:
@@ -657,7 +660,7 @@ class Param:
                  agari_junme: int, 
                  is_tsumo: bool, 
                  is_ron: bool, 
-                 is_ippatsu_deny: bool, 
+                #  is_ippatsu_deny: bool, 
                  is_chyankan: bool, 
                  available_pai_num: int, 
                  menfon: str, 
@@ -670,7 +673,7 @@ class Param:
         self.agari_junme = agari_junme
         self.is_tsumo = is_tsumo
         self.is_ron = is_ron
-        self.is_ippatsu_deny = is_ippatsu_deny
+        # self.is_ippatsu_deny = is_ippatsu_deny
         self.is_chyankan = is_chyankan
         self.available_pai_num = available_pai_num
         self.menfon = menfon
@@ -697,205 +700,195 @@ class Han:
         return f"{self.name}：{self.hansuu}飜"
 
 class AgariResult:
-    def __init__(self, tehai: Tehai, agari_pai: Pai, param: Param):
-        self.tehai = tehai
-        self.agari_pai = agari_pai
-        self.param = param
-        self.is_menchin = all([furo.type == lang.ankan for furo in tehai.furo_list])
-        
-        # 高點法結果
-        self.is_yakuman: bool
-        self.tehai_comb: TehaiComb
-        self.yaku_list: list[Yaku]
-        self.han_list: list[Han]
-        self.hansuu: int
-        self.fusuu: Union[int, None]
-        self.basic_tensuu: int
-        self.tensuu: tuple[int]
-
-        self.available_yaku_comb_list: list[list[Yaku]]
-        self.available_han_comb_list: list[list[Han]]
-        
-        tehai.get_tehai_comb_list()
-        self.get_hansuu()
-        self.get_fusuu()
-        self.get_tensuu()
+    def __init__(self, 
+                 is_yakuman: bool, 
+                 tehai_comb: TehaiComb, 
+                 yaku_list: list[Yaku], 
+                 han_list: list[Han], 
+                 hansuu: int, 
+                 fusuu: Union[int, None], 
+                 basic_tensuu: int, 
+                 tensuu: tuple[int]
+                 ) -> None:
+        self.is_yakuman: bool = is_yakuman
+        self.tehai_comb: TehaiComb = tehai_comb
+        self.yaku_list: list[Yaku] = yaku_list
+        self.han_list: list[Han] = han_list
+        self.hansuu: int = hansuu
+        self.fusuu: Union[int, None] = fusuu
+        self.basic_tensuu: int = basic_tensuu
+        self.tensuu: tuple[int] = tensuu
 
     def __str__(self):
         return self.tehai_comb.__str__() + "\n" + "\n".join(h.__str__() for h in self.han_list) + f"\n{self.hansuu}飜 {self.fusuu if not self.fusuu is None else '*'}符\n" + " ".join([str(n) for n in self.tensuu])
 
-    def get_hansuu(self) -> None:
-        available_tehai_comb_list = []
-        self.available_yaku_comb_list = []
-        self.available_han_comb_list = []
-        for tc in self.tehai.tehai_comb_list:
-            if tc.tenpai == self.agari_pai:
-                self.available_yaku_comb_list.append(get_yaku_list(tc, self.param))
-                available_tehai_comb_list.append(tc)
-        max_hansuu = 0
-        max_hansuu_pos: Union[int, None] = None
-        count = 0
-        # yaku
-        for yl in self.available_yaku_comb_list:
-            hansum = 0
-            han_list = []
-            for y in yl:
-                han = Han(y, self.is_menchin)
-                han_list.append(han)
-                hansum += han.hansuu
-            if max_hansuu < hansum:
-                max_hansuu = hansum
-                max_hansuu_pos = count
-            self.available_han_comb_list.append(han_list)
-            count += 1
-        if max_hansuu_pos is None:
-            raise RuntimeError("no agari error")
-        self.tehai_comb = available_tehai_comb_list[max_hansuu_pos]
-        self.hansuu = max_hansuu
-        self.yaku_list = self.available_yaku_comb_list[max_hansuu_pos]
-        self.han_list = self.available_han_comb_list[max_hansuu_pos]
+def get_agari_result_list(tehai: Tehai, agari_pai: Pai, param: Param):
+    result: list[AgariComb] = []
+    # get tehai comb list
+    if len(tehai.get_tehai_comb_list()) == 0: # no ten
+        raise RuntimeError("get_agari_result_list no ten error")
+    available_tehai_comb_list: list[TehaiComb] = []
+    for tc in tehai.tehai_comb_list:
+        if tc.tenpai == agari_pai:
+            available_tehai_comb_list.append(tc)
 
-        self.is_yakuman = self.yaku_list[0].is_yakuman
-
-        if not support.is_aotenjyou and self.is_yakuman:
-            return 
-        all_pai = self.tehai_comb.all_pais()
-        # akadora
-        akadora_suu = len(self.tehai_comb.akadora_list)
-        if akadora_suu != 0:
-            self.hansuu += akadora_suu
-            self.han_list.append(Han(lang.akadora, self.is_menchin, akadora_suu))
-        # dora
-        dora_suu = 0
-        for dora_pointer in self.param.dora_pointers:
-            dora_suu += all_pai.count(dora_pointer.next())
-        if dora_suu != 0:
-            self.hansuu += dora_suu
-            self.han_list.append(Han(lang.dora, self.is_menchin, dora_suu))
-        # uradora
-        if self.param.is_riichi:
-            uradora_suu = 0
-            for uradora_pointer in self.param.uradora_pointers:
-                uradora_suu += all_pai.count(uradora_pointer.next())
-            self.hansuu += uradora_suu
-            self.han_list.append(Han(lang.uradora, self.is_menchin, uradora_suu))
+    # 處理每種和牌型
+    is_menchin = all([furo.type == lang.ankan for furo in tehai.furo_list])
+    for tc in available_tehai_comb_list:
+        # 飜數
+        hansum = 0
+        han_list = []
+        yl = get_yaku_list(tc, param)
+        for y in yl:
+            han = Han(y, is_menchin)
+            han_list.append(han)
+            hansum += han.hansuu
+        if hansum < support.shibarisuu: # less than yaku shibari
+            continue
+        is_yakuman = yl[0].is_yakuman
+        if support.is_aotenjyou or not is_yakuman: # calculate dora
+            all_pai = tc.all_pais()
+            # akadora
+            akadora_suu = len(tc.akadora_list)
+            if akadora_suu != 0:
+                hansum += akadora_suu
+                han_list.append(Han(lang.akadora, is_menchin, akadora_suu))
+            # dora
+            dora_suu = 0
+            for dora_pointer in param.dora_pointers:
+                dora_suu += all_pai.count(dora_pointer.next())
+            if dora_suu != 0:
+                hansum += dora_suu
+                han_list.append(Han(lang.dora, is_menchin, dora_suu))
+            # uradora
+            if param.is_riichi:
+                uradora_suu = 0
+                for uradora_pointer in param.uradora_pointers:
+                    uradora_suu += all_pai.count(uradora_pointer.next())
+                hansum += uradora_suu
+                han_list.append(Han(lang.uradora, is_menchin, uradora_suu))
         
-    def get_fusuu(self) -> None:
-        if not support.is_aotenjyou: # 非青天井則役滿不計符數
-            if self.yaku_list[0].is_yakuman: # 役滿以上
-                self.fusuu = None
-                return
-        if self.tehai_comb.tenpai_type == lang.chiitoitsutanmenmachi: # 七對子
-            self.fusuu = 25
-            return 
-        if support.is_koyaku:
-            pass 
-        if self.tehai_comb.tenpai_type in (lang.kokushimusoutanmenmachi, lang.kokushimusoujuusanmenmachi): # 國士
-            self.fusuu = 30
-            return 
-        elif support.lang_yaku_dict[lang.pinfu] in self.yaku_list: # 平和
-            if self.param.is_tsumo:
-                self.fusuu = 20
-                return 
-            else:
-                self.fusuu = support.pinfu_ron_fusuu
-                return 
-        fu = 20
-        if self.is_menchin and self.param.is_ron: # 門前清榮胡加符
-            fu += 10
-        if self.param.is_tsumo: # 自摸符
-            fu += 2
-        if self.tehai_comb.tenpai_type in (lang.kanchoomachi, lang.tankimachi, lang.henchoomachi): # 中洞、邊獨、單騎聽牌
-            fu += 2
-        # 面子和雀頭加符
-        toitsu_pai: Pai = self.tehai_comb.tenpai if self.tehai_comb.tenpai_type == lang.tankimachi else self.tehai_comb.toitsu_list[0].pai_list[0]
-        minkou_pai: list[Pai] = []
-        ankou_pai: list[Pai] = []
-        minkan_pai: list[Pai] = []
-        ankan_pai: list[Pai] = []
-        for f in self.tehai_comb.furo_list:
-            if f.type == lang.koutsu:
-                minkou_pai.append(f.pai_tuple[0])
-            elif f.type in (lang.minkan, lang.kakan):
-                minkan_pai.append(f.pai_tuple[0])
-            elif f.type == lang.ankan:
-                ankan_pai.append(f.pai_tuple[0])
-        for m in self.tehai_comb.mentsu_list:
-            if m.type == lang.koutsu:
-                ankou_pai.append(m.pai_list[0])
-        if self.tehai_comb.tenpai_type == lang.soohoomachi: # 雙碰聽計刻
-            if self.param.is_tsumo:
-                ankan_pai.append(self.tehai_comb.tenpai)
-            else: # 榮和計為明刻
-                minkan_pai.append(self.tehai_comb.tenpai)
-        yakuhai_tuple = (
-            Pai(support.lang_yakuhai_painame_dict[support.fonwei_lang_tsufon_yaku_dict[self.param.menfon]]), 
-            Pai(support.lang_yakuhai_painame_dict[support.fonwei_lang_tsufon_yaku_dict[self.param.chanfon]]), 
-            Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_haku]), 
-            Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_hatsu]), 
-            Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_chun])
-        )
-        temp = yakuhai_tuple.count(toitsu_pai)
-        if temp == 1:
-            fu += 2
-        elif temp == 2:
-            fu += support.rienfontoitsu_fusuu
-        for p in minkou_pai:
-            if p in yaochuu_list:
-                fu += 4
-            else:
-                fu += 2
-        for p in ankou_pai:
-            if p in yaochuu_list:
-                fu += 8
-            else:
-                fu += 4
-        for p in minkan_pai:
-            if p in yaochuu_list:
-                fu += 16
-            else:
-                fu += 8
-        for p in ankan_pai:
-            if p in yaochuu_list:
-                fu += 32
-            else:
-                fu += 16
+        # 符數
+        fusuu = get_fusuu(yl, tc, param, is_menchin)
 
-        self.fusuu = (fu//10 + (fu % 10 != 0)) * 10 # 無條件進位
+        # 點數
+        basic_tensuu, tensuu = get_tensuu(hansum, fusuu, is_yakuman, param)
+        result.append(AgariResult(is_yakuman, tc, yl, han_list, hansum, fusuu, basic_tensuu, tensuu))
+    return result
 
-    def get_tensuu(self) -> None:
-        if support.is_aotenjyou or self.hansuu < 3 or (self.hansuu == 4 and self.fusuu <= 30) or (self.hansuu == 3 and self.fusuu <= 60):
-            self.basic_tensuu = self.fusuu * 2**(self.hansuu + 2)
-        elif self.is_yakuman:
-            self.basic_tensuu = 8000 * (self.hansuu//13)
-        elif self.hansuu >= 3 and self.hansuu <= 5: # mankan
-            self.basic_tensuu = 2000
-        elif self.hansuu >= 6 and self.hansuu <= 7: # haneman
-            self.basic_tensuu = 3000
-        elif self.hansuu >= 8 and self.hansuu <= 10: # baiman
-            self.basic_tensuu = 4000
-        elif self.hansuu >= 11 and self.hansuu <= 12: # sanbaiman
-            self.basic_tensuu = 6000
-        else: # kazoeyakuman
-            self.basic_tensuu = 8000
-        
-        if self.param.menfon == support.fonwei_tuple[0]: # 莊
-            if self.param.is_tsumo:
-                n = self.round_up(self.basic_tensuu*2, 2)
-                self.tensuu = (n, n, n)
-            else:
-                self.tensuu = (self.round_up(self.basic_tensuu*6, 2), )
-        else: # 閒
-            if self.param.is_tsumo:
-                n1 = self.round_up(self.basic_tensuu*2, 2)
-                n2 = self.round_up(self.basic_tensuu, 2)
-                self.tensuu = (n1, n2, n2)
-            else:
-                self.tensuu = (self.round_up(self.basic_tensuu*4, 2), )
+def get_fusuu(yaku_list: list[Yaku], tehai_comb: TehaiComb, param: Param, is_menchin: bool) -> Union[int, None]:
+    if not support.is_aotenjyou: # 非青天井則役滿不計符數
+        if yaku_list[0].is_yakuman: # 役滿以上
+            return None
+    if tehai_comb.tenpai_type == lang.chiitoitsutanmenmachi: # 七對子
+        return 25
+    if support.is_koyaku:
+        pass 
+    if tehai_comb.tenpai_type in (lang.kokushimusoutanmenmachi, lang.kokushimusoujuusanmenmachi): # 國士
+        return 30
+    elif support.lang_yaku_dict[lang.pinfu] in yaku_list: # 平和
+        if param.is_tsumo:
+            return 20
+        else:
+            return support.pinfu_ron_fusuu
+    fu = 20
+    if is_menchin and param.is_ron: # 門前清榮胡加符
+        fu += 10
+    if param.is_tsumo: # 自摸符
+        fu += 2
+    if tehai_comb.tenpai_type in (lang.kanchoomachi, lang.tankimachi, lang.henchoomachi): # 中洞、邊獨、單騎聽牌
+        fu += 2
+    # 面子和雀頭加符
+    toitsu_pai: Pai = tehai_comb.tenpai if tehai_comb.tenpai_type == lang.tankimachi else tehai_comb.toitsu_list[0].pai_list[0]
+    minkou_pai: list[Pai] = []
+    ankou_pai: list[Pai] = []
+    minkan_pai: list[Pai] = []
+    ankan_pai: list[Pai] = []
+    for f in tehai_comb.furo_list:
+        if f.type == lang.koutsu:
+            minkou_pai.append(f.pai_tuple[0])
+        elif f.type in (lang.minkan, lang.kakan):
+            minkan_pai.append(f.pai_tuple[0])
+        elif f.type == lang.ankan:
+            ankan_pai.append(f.pai_tuple[0])
+    for m in tehai_comb.mentsu_list:
+        if m.type == lang.koutsu:
+            ankou_pai.append(m.pai_list[0])
+    if tehai_comb.tenpai_type == lang.soohoomachi: # 雙碰聽計刻
+        if param.is_tsumo:
+            ankan_pai.append(tehai_comb.tenpai)
+        else: # 榮和計為明刻
+            minkan_pai.append(tehai_comb.tenpai)
+    yakuhai_tuple = (
+        Pai(support.lang_yakuhai_painame_dict[support.fonwei_lang_tsufon_yaku_dict[param.menfon]]), 
+        Pai(support.lang_yakuhai_painame_dict[support.fonwei_lang_tsufon_yaku_dict[param.chanfon]]), 
+        Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_haku]), 
+        Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_hatsu]), 
+        Pai(support.lang_yakuhai_painame_dict[lang.yakuhai_chun])
+    )
+    temp = yakuhai_tuple.count(toitsu_pai)
+    if temp == 1:
+        fu += 2
+    elif temp == 2:
+        fu += support.rienfontoitsu_fusuu
+    for p in minkou_pai:
+        if p in yaochuu_list:
+            fu += 4
+        else:
+            fu += 2
+    for p in ankou_pai:
+        if p in yaochuu_list:
+            fu += 8
+        else:
+            fu += 4
+    for p in minkan_pai:
+        if p in yaochuu_list:
+            fu += 16
+        else:
+            fu += 8
+    for p in ankan_pai:
+        if p in yaochuu_list:
+            fu += 32
+        else:
+            fu += 16
+
+    return (fu//10 + (fu % 10 != 0)) * 10 # 無條件進位
     
-    def round_up(self, n: int, ndigits: int) -> int:
-        mod = 10**ndigits
-        return (n//mod + (n % mod != 0)) * mod
+def round_up(n: int, ndigits: int) -> int:
+    mod = 10**ndigits
+    return (n//mod + (n % mod != 0)) * mod
+
+def get_tensuu(hansuu: int, fusuu: int, is_yakuman: bool, param: Param) -> tuple[int]:
+    basic_tensuu: int
+    if support.is_aotenjyou or hansuu < 3 or (hansuu == 4 and fusuu <= 30) or (hansuu == 3 and fusuu <= 60):
+        basic_tensuu = fusuu * 2**(hansuu + 2)
+    elif is_yakuman:
+        basic_tensuu = 8000 * (hansuu//13)
+    elif hansuu >= 3 and hansuu <= 5: # mankan
+        basic_tensuu = 2000
+    elif hansuu >= 6 and hansuu <= 7: # haneman
+        basic_tensuu = 3000
+    elif hansuu >= 8 and hansuu <= 10: # baiman
+        basic_tensuu = 4000
+    elif hansuu >= 11 and hansuu <= 12: # sanbaiman
+        basic_tensuu = 6000
+    else: # kazoeyakuman
+        basic_tensuu = 8000
+    
+    if param.menfon == support.fonwei_tuple[0]: # 莊
+        if param.is_tsumo:
+            n = round_up(basic_tensuu*2, 2)
+            tensuu = (n, n, n)
+        else:
+            tensuu = (round_up(basic_tensuu*6, 2), )
+    else: # 閒
+        if param.is_tsumo:
+            n1 = round_up(basic_tensuu*2, 2)
+            n2 = round_up(basic_tensuu, 2)
+            tensuu = (n1, n2, n2)
+        else:
+            tensuu = (round_up(basic_tensuu*4, 2), )
+    return basic_tensuu, tensuu
 
 def get_yaku_list(tehai_comb: TehaiComb, param: Param) -> list[Yaku]:
     """獲取給定胡牌組合的全役種"""
@@ -933,7 +926,9 @@ def get_yaku_list(tehai_comb: TehaiComb, param: Param) -> list[Yaku]:
             result.append(support.lang_yaku_dict[lang.dabururiichi].copy())
         else:
             result.append(support.lang_yaku_dict[lang.riichi].copy())
-        if param.agari_junme == param.riichi_junme + 1 and not param.is_ippatsu_deny:
+        if param.is_tsumo and param.agari_junme == param.riichi_junme + 1: # 一發自摸
+            result.append(support.lang_yaku_dict[lang.ippatsu].copy())
+        elif param.is_ron and param.agari_junme == param.riichi_junme: # 一發榮和
             result.append(support.lang_yaku_dict[lang.ippatsu].copy())
 
     # 搶槓

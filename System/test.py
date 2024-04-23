@@ -39,7 +39,6 @@ param = Param(
     agari_junme=10, 
     is_tsumo=True, 
     is_ron=False, 
-    is_ippatsu_deny = False, 
     is_chyankan=False, 
     available_pai_num=30, 
     menfon=lang.nan, 
@@ -68,5 +67,5 @@ tehai.furo_list.append(furo1)
 #     [print(p, end = " ") for p in c.all_pais()]
 #     print("\n")
 
-result = AgariResult(tehai, agari_pai=Pai("5s"), param=param)
-print(result)
+l = get_agari_result_list(tehai, agari_pai=Pai("5s"), param=param)
+[print(r) for r in l]
