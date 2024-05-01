@@ -26,6 +26,24 @@ round_pei_nikyoku = "北二局"
 round_pei_sankyoku = "北三局"
 round_pei_yonkyoku = "北四局"
 
+action_tsumo = "行為：自摸"
+action_ron = "行為：榮和"
+action_chii = "行為：吃"
+action_pon = "行為：碰"
+action_minkan = "行為：明槓"
+action_kakan = "行為：加槓"
+action_ankan = "行為：暗槓"
+action_kyuushukyuuhai_ryukyoku = "行為：九種九牌流局"
+action_riichi = "行為：立直"
+option_tsumo = "自摸"
+option_ron = "榮和"
+option_chii = "吃"
+option_pon = "碰"
+option_minkan = "槓"
+option_kakan = "槓"
+option_ankan = "槓"
+option_kyuushukyuuhai_ryukyoku = "行為：九種九牌"
+
 ton = "東"
 nan = "南"
 shaa = "西"
@@ -54,6 +72,16 @@ kamichya = "上家"
 shimochya = "下家"
 toichya = "對家"
 
+status_agari = "和了"
+status_agari_renchan = "和了連莊"
+status_ryukyoku_renchan = "流局連莊"
+status_huanpai_ryukyoku = "荒牌流局"
+status_suukansanra = "四槓散了"
+status_suuhonrenda = "四風連打"
+status_kyuushukyuuhai_ryukyoku = "九種九牌"
+status_suuchariichi = "四家立直"
+status_sanchahoo = "三家和"
+
 yakuman_level_list=('','役滿','兩倍役滿','三倍役滿','四倍役滿','五倍役滿','六倍役滿','七倍役滿')
 kazoeyakuman='累計役滿'
 tehai="手牌"
@@ -77,6 +105,7 @@ kokushimusou_agari_type = "國士無雙型"
 normal_agari_type = "普通型"
 special_koyaku_agari_type = "特殊古役型"
 
+# 役
 # 1
 riichi='立直'
 ippatsu="一發"
@@ -201,4 +230,4 @@ junseiheiiisoo = "純正黑一色"
 sanshokudookan = "三色同槓"
 suuankan = "四暗槓"
 
-paarenchyan = "八連莊"
+paarenchan = "八連莊"

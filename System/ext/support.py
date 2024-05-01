@@ -1,7 +1,46 @@
 from lang import tc as lang
 from typing import Union
 
+
+######################### 遊戲規則設定 ##########################
+gametype_tensuu_init_dict = { # 開局點數
+    lang.yonin_ton: 25000,
+    lang.yonin_ton_ikkyoku: 25000,
+    lang.yonin_nan: 25000,
+    lang.sannin_ton: 35000,
+    lang.sannin_ton_ikkyoku: 35000,
+    lang.sannin_nan: 35000
+}
+
+gametype_tensuu_over_dict = { # 最低結束點數
+    lang.yonin_ton: 30000,
+    lang.yonin_ton_ikkyoku: 30000,
+    lang.yonin_nan: 30000,
+    lang.sannin_ton: 40000,
+    lang.sannin_ton_ikkyoku: 40000,
+    lang.sannin_nan: 40000
+}
+
+is_tobitsuzuku = False # 是否擊飛繼續
+
+is_last_oya_infinitely_renchan = False
+
+shibarisuu = 1 # 飜縛
+
+is_koyaku = False # 是否包含古役
+
+is_aotenjyou = False # 是否使用青天井規則
+
+is_kuitan = True # 是否有食斷
+
+pinfu_ron_fusuu = 30 # 平和榮和符數
+
+rienfontoitsu_fusuu = 2 # 連風對子符數
+
+################################################################
+
 ######################### 基本字形定義 #########################
+##### key 不得重複 #####
 lang_paitype_dict = { # 不得重複 # 不得為數字
     lang.man: "m",
     lang.suo: "s",
@@ -17,7 +56,7 @@ fonwei_tuple = ( # 不得重複
     lang.ton, lang.nan, lang.shaa, lang.pei
 )
 
-lang_yakuhai_painame_dict = { # key 不得重複
+lang_yakuhai_painame_dict = {
     lang.yakuhai_ton: "1z", 
     lang.yakuhai_nan: "2z", 
     lang.yakuhai_shaa: "3z", 
@@ -31,32 +70,42 @@ lang_yakuhai_painame_dict = { # key 不得重複
     lang.yakuhai_chun: "7z"
 }
 
-fonwei_lang_tsufon_yaku_dict = { # key 不得重複
+fonwei_lang_tsufon_yaku_dict = {
     lang.ton: lang.yakuhai_ton, 
     lang.nan: lang.yakuhai_nan, 
     lang.shaa: lang.yakuhai_shaa, 
     lang.pei: lang.yakuhai_pei, 
 }
 
-fonwei_lang_chanfon_yaku_dict = { # key 不得重複
+fonwei_lang_chanfon_yaku_dict = {
     lang.ton: lang.yakuhai_ton_chanfon, 
     lang.nan: lang.yakuhai_nan_chanfon, 
     lang.shaa: lang.yakuhai_shaa_chanfon, 
     lang.pei: lang.yakuhai_pei_chanfon, 
 }
 
-lang_tsufon_yaku_fonwei_dict = { # key 不得重複
+lang_tsufon_yaku_fonwei_dict = {
     lang.yakuhai_ton: lang.ton, 
     lang.yakuhai_nan: lang.nan, 
     lang.yakuhai_shaa: lang.shaa, 
     lang.yakuhai_pei: lang.pei, 
 }
 
-lang_chanfon_yaku_fonwei_dict = { # key 不得重複
+lang_chanfon_yaku_fonwei_dict = {
     lang.yakuhai_ton_chanfon: lang.ton, 
     lang.yakuhai_nan_chanfon: lang.nan, 
     lang.yakuhai_shaa_chanfon: lang.shaa, 
     lang.yakuhai_pei_chanfon: lang.pei, 
+}
+
+lang_action_lang_option_dict = {
+    lang.action_tsumo: lang.option_tsumo, 
+    lang.action_ron: lang.option_ron, 
+    lang.action_chii: lang.option_chii, 
+    lang.action_pon: lang.option_pon, 
+    lang.action_minkan : lang.option_minkan, 
+    lang.action_kakan : lang.option_kakan, 
+    lang.action_ankan : lang.option_ankan
 }
 ################################################################
 
@@ -85,31 +134,6 @@ chanfon_pos_dict = {
 }
 
 ################################################################
-
-######################### 遊戲規則設定 ##########################
-gametype_tensuu_init_dict = {
-    lang.yonin_ton: 25000,
-    lang.yonin_ton_ikkyoku: 25000,
-    lang.yonin_nan: 25000,
-    lang.sannin_ton: 35000,
-    lang.sannin_ton_ikkyoku: 35000,
-    lang.sannin_nan: 35000
-}
-
-shibarisuu = 1 # 飜縛
-
-is_koyaku = False # 是否包含古役
-
-is_aotenjyou = False # 是否使用青天井規則
-
-is_kuitan = True # 是否有食斷
-
-pinfu_ron_fusuu = 30 # 平和榮和符數
-
-rienfontoitsu_fusuu = 2 # 連風對子符數
-
-################################################################
-
 
 ######################### 役種相關 ##############################
 class Yaku():
@@ -271,8 +295,8 @@ daburu_yakuman_koyaku_list = [
     lang.sanshokudookan, 
     lang.suuankan
 ]
-mechin_only_koyaku_list = []
-furo_minus_koyaku_list = []
+mechin_only_koyaku_list: list[str] = []
+furo_minus_koyaku_list: list[str] = []
 
 lang_yaku_dict: dict[str, Yaku] = {}
 
@@ -325,7 +349,7 @@ koumokukoukan_lang_dict: dict[str, tuple[Yaku]] = { # 不可複合役之組合
     lang.ryanpeekoo: (lang_yaku_dict[lang.iipeekoo], )
 }
 
-oatenjyou_koumokukoukan_lang_dict: dict[str, tuple[Yaku]] = { # 不可複合之役(for 青天井)組合
+oatenjyou_koumokukoukan_lang_dict: dict[str, Union[tuple[Yaku], tuple[Yaku, Yaku]]] = { # 不可複合之役(for 青天井)組合
     lang.tenhou: (lang_yaku_dict[lang.tsumo], ), 
     lang.chiihou: (lang_yaku_dict[lang.tsumo], ), 
     lang.suuankoo: (lang_yaku_dict[lang.sanankoo], 
