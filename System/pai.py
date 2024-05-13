@@ -28,7 +28,7 @@ class Pai:
     def __eq__(self, other):
         if not isinstance(other, Union[Pai, str]):
             return False
-        if type(other) == str:
+        if isinstance(other, str):
             other = Pai(other)
         if other.type is None or self.type is None:
             return False
@@ -50,12 +50,24 @@ class Pai:
 
     def int_sign(self, is_include_akadora = False) -> int:
         # 1~9; 11~19; 21~29; 31~39; 41~47; 00 10 20 (akadora)
+        if not isinstance(self.number, int):
+            raise TypeError(f"cannot get sign with self.type: {type(self.number).__name__}")
+        if not isinstance(self.type, str):
+            raise TypeError(f"cannot get sign with self.type: {type(self.type).__name__}")
+        if not isinstance(self.name, str):
+            raise TypeError(f"cannot get sign with self.type: {type(self.name).__name__}")
         if not is_include_akadora:
             return support.paitype_sign_number_dict[self.type]*10 + self.number
         else:
             return support.paitype_sign_number_dict[self.type]*10 + int(self.name[0])
 
     def next(self, is_allow_mod = False):
+        if not isinstance(self.number, int):
+            raise TypeError(f"cannot get next with self.type: {type(self.number).__name__}")
+        if not isinstance(self.type, str):
+            raise TypeError(f"cannot get next with self.type: {type(self.type).__name__}")
+        if not isinstance(self.name, str):
+            raise TypeError(f"cannot get next with self.type: {type(self.name).__name__}")
         if self.type is None:
             return Pai(None)
         if self.type == support.lang_paitype_dict[lang.zuu]:
@@ -68,6 +80,12 @@ class Pai:
             return Pai(str((self.number + 1) % 10) + self.type)
     
     def previous(self, is_allow_mod = False):
+        if not isinstance(self.number, int):
+            raise TypeError(f"cannot get previous with self.type: {type(self.number).__name__}")
+        if not isinstance(self.type, str):
+            raise TypeError(f"cannot get previous with self.type: {type(self.type).__name__}")
+        if not isinstance(self.name, str):
+            raise TypeError(f"cannot get previous with self.type: {type(self.name).__name__}")
         if self.type is None:
             return Pai(None)
         if self.type == support.lang_paitype_dict[lang.zuu]:

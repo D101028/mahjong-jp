@@ -29,7 +29,7 @@ class Player:
 
         self.is_riichi: bool = False
         self.riichi_junme: Union[bool, None] = None
-        self.player_junme: bool = 0 # plus 1 if 自家摸牌、鳴牌 or 任一人吃、碰、槓、拔北
+        self.player_junme: int = 0 # plus 1 if 自家摸牌、鳴牌 or 任一人吃、碰、槓、拔北
 
         self.doujin_furiten_pais: list[Pai] = []
         self.riichi_furiten_pais: list[Pai] = []
