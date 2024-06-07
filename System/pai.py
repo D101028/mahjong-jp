@@ -132,12 +132,11 @@ def create_pai_list(name_list: Union[list[str], str]):
     if isinstance(name_list, str):
         num_list: list[str] = []
         for i in name_list:
-            try:
-                int(i)
+            if i.isdigit():
                 num_list.append(i)
-            except:
+            else:
                 pai_list += [Pai(n+i) for n in num_list]
-                num_list = []
+                num_list.clear()
     else:
         pai_list = [Pai(i) for i in name_list]
     return pai_list
@@ -1313,6 +1312,3 @@ def get_yaku_list(tehai_comb: TehaiComb, param: Param) -> list[Yaku]:
     result.sort(key = lambda n: n.ori_hansuu)
 
     return result
-
-
-Pai(123)
