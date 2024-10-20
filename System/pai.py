@@ -407,7 +407,7 @@ def is_agari(pai_list: list[Pai]):
         return True
 
     # 國士無雙型
-    if all(p in all_pai for p in yaochuu_list):
+    if all(p in all_pai for p in yaochuu_list) and len(pai_list) == 14:
         return True
 
     # 普通和牌型
